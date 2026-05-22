@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdfor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdfor(Address::class)->constrained();
-            $table->float('amount');
+            $table->float('total_price');
             $table->timestamps();
 
             // user_id as a foreign key

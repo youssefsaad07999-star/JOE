@@ -2,12 +2,17 @@
 
 namespace App\Models\ProductModels;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProductVariant extends Model
 {
+    use HasFactory;
+
+    protected $gaurded;
+
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
@@ -16,11 +21,6 @@ class ProductVariant extends Model
     public function size(): BelongsTo
     {
         return $this->belongsTo(Size::class);
-    }
-
-    public function fit(): BelongsTo
-    {
-        return $this->belongsTo(Fit::class);
     }
 
     public function color(): BelongsTo

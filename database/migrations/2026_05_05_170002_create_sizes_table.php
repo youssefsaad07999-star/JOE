@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('sizes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('tybe', ['alpha', 'numeric']);
+            $table->enum('type', ['alpha', 'numeric']);
             $table->timestamps();
         });
     }

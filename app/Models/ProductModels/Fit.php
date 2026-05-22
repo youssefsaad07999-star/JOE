@@ -2,13 +2,18 @@
 
 namespace App\Models\ProductModels;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Fit extends Model
 {
-    public function variants(): HasMany
+    use HasFactory;
+
+    protected $gaurded;
+
+    public function products(): HasMany
     {
-        return $this->hasMany(ProductVariant::class);
+        return $this->hasMany(Product::class);
     }
 }

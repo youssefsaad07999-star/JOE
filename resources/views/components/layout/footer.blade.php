@@ -1,7 +1,7 @@
 <footer class="h-auto bg-black text-white rounded-3xl mt-10">
     <div class="flex flex-col md:flex-row justify-between items-center px-6 py-6"> <!-- Logo / Brand -->
         <div class="flex items-center mb-4 md:mb-0">
-            <div class="w-16 h-16"> <img class="rounded-3xl" src="images/Logo.jpeg"> </div> <span
+            <div class="w-16 h-16"> <img class="rounded-3xl" src="{{ asset('images/Logo.jpeg') }}"> </div> <span
                 class="ml-3 text-lg font-semibold">Store</span>
         </div>
         <!-- Socials -->

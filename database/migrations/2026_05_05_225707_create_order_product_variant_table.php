@@ -17,8 +17,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete(); // ->cascadeOnDelete()
             $table->foreignIdFor(ProductVariant::class)->constrained()->cascadeOnDelete(); // ->cascadeOnDelete()
-            $table->integer('quantity')->default(1);
-            $table->decimal('price', 10, 2);
+            $table->integer('quantity')->default(0);
+            $table->decimal('unit_price');
+            $table->decimal('subtotal', 10, 2);
             $table->timestamps();
         });
     }

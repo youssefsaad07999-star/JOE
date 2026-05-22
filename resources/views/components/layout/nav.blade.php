@@ -1,7 +1,7 @@
 <nav class="h-20 bg-black text-white rounded-3xl">
     <div class="flex justify-between items-center">
         <div class="w-20 h-20">
-            <img class="mx-1 rounded-3xl" src="images/Logo.jpeg">
+            <img class="mx-1 rounded-3xl" src="{{ asset('images/Logo.jpeg') }}">
         </div>
         <div class="flex items-center">
             <a href="/"
