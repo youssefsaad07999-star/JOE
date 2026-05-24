@@ -24,6 +24,6 @@ class SubcategoryController extends Controller
             fn ($q) => $q->where('id', $subcategory->id)
         )->get();
 
-        return view('product.subcategory.show', compact('gender', 'category', 'products', 'subcategories'));
+        return view('product.subcategory.show', compact('gender', 'category', 'products', 'subcategory', 'subcategories'));
     }
 }

@@ -7,31 +7,31 @@ use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
+    public static array $data = [
+        'men' => [
+            'jackets' => ['leather', 'buffers'],
+            'shirts' => ['plain', 'formal', 'printed'],
+            't-shirts' => ['basic', 'printed', 'stripped'],
+            'polo_t-shirts' => ['basic', 'printed'],
+            'trousers' => ['chino', 'cargo', 'jeans'],
+        ],
+        'women' => [
+            'jackets' => ['leather', 'buffers'],
+            'shirts' => ['plain', 'formal', 'printed'],
+            't-shirts' => ['basic', 'printed', 'stripped'],
+            'trousers' => ['chino', 'cargo', 'jeans'],
+            'dresses' => ['events', 'beach'],
+            'skirts' => ['midi', 'mini'],
+        ],
+    ];
+
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
 
-        $data = [
-            'men' => [
-                'jackets' => ['leather', 'buffers'],
-                'shirts' => ['plain', 'formal', 'printed'],
-                't-shirts' => ['basic', 'printed', 'stripped'],
-                'polo_t-shirts' => ['basic', 'printed'],
-                'trousers' => ['chino', 'cargo', 'jeans'],
-            ],
-            'women' => [
-                'jackets' => ['leather', 'buffers'],
-                'shirts' => ['plain', 'formal', 'printed'],
-                't-shirts' => ['basic', 'printed', 'stripped'],
-                'trousers' => ['chino', 'cargo', 'jeans'],
-                'dresses' => ['events', 'beach'],
-                'skirts' => ['midi', 'mini'],
-            ],
-        ];
-
-        foreach ($data as $genderName => $categories) {
+        foreach (CategorySeeder::$data as $genderName => $categories) {
             $genderOrder = 1;
             $gender = $this->createCategory($genderName, null, 'gender', $genderOrder++);
 

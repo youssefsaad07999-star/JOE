@@ -17,7 +17,7 @@ beforeEach(function () {
     ]);
 });
 
-dataset('genders', ['men', 'women']);
+dataset('genders', array_keys(CategorySeeder::$data));
 
 describe('Subcategory page', function () {
 
@@ -27,9 +27,10 @@ describe('Subcategory page', function () {
             ->with('children')
             ->first();
 
-        $this->get(route("$gender.subcategory.show", [
-            'category' => $category,
-            'subcategory' => $category->children->first(),
+        $this->get(route('gender.subcategory.show', [
+            'gender' => $gender,
+            'category' => $category->slug,
+            'subcategory' => $category->children->first()->slug,
         ]))->assertOk();
 
     })->with('genders');
@@ -39,8 +40,9 @@ describe('Subcategory page', function () {
             ->whereHas('parent', fn ($q) => $q->where('slug', $gender))
             ->first();
 
-        $this->get(route("$gender.subcategory.show", [
-            'category' => $category,
+        $this->get(route('gender.subcategory.show', [
+            'gender' => $gender,
+            'category' => $category->slug,
             'subcategory' => 'non-existent',
         ]))->assertNotFound();
 
@@ -52,31 +54,56 @@ describe('Subcategory page', function () {
             ->whereHas('parent', fn ($q) => $q->where('slug', $gender))
             ->first();
 
-        $wrongSubcategory = Category::where('depth', 'subcategory')
-            ->whereHas('parent', fn ($q) => $q->where('id', '!=', $category->id))
+        $uniqueGender = Category::genders()
+            ->where('slug', $gender)
             ->first();
+        $uniqueCategory = Category::create([
+            'name' => 'Unique to '.$gender,
+            'slug' => 'unique-to-'.$gender,
+            'depth' => 'category',
+            'parent_id' => $uniqueGender->id,
+            'is_active' => true,
+        ]);
 
-        $this->get(route("$gender.subcategory.show", [
-            'category' => $category,
-            'subcategory' => $wrongSubcategory,
+        $uniqueSubcategory = Category::create([
+            'name' => 'Unique to '.$uniqueCategory->name,
+            'slug' => 'unique-to-'.$uniqueCategory->slug,
+            'depth' => 'subcategory',
+            'parent_id' => $uniqueCategory->id,
+            'is_active' => true,
+        ]);
+
+        $this->get(route('gender.subcategory.show', [
+            'gender' => $gender,
+            'category' => $category->slug,
+            'subcategory' => $uniqueSubcategory->slug,
         ]))->assertNotFound();
-
+        // 200
     })->with('genders');
 
     it('return 404 when subcategory belongs to the opposite gender', function (string $gender) {
-        $oppositeGender = $gender === 'men' ? 'women' : 'men';
+        $opposite = $gender === 'men' ? 'women' : 'men';
 
         $oppositeCategory = Category::where('depth', 'category')
-            ->whereHas('parent', fn ($q) => $q->where('slug', $oppositeGender))
+            ->whereHas('parent', fn ($q) => $q->where('slug', $opposite))
             ->first();
 
-        $oppositeSubcategory = Category::where('depth', 'subcategory')
-            ->where('parent_id', $oppositeCategory->id)
+        $category = Category::where('depth', 'category')
+            ->whereHas('parent', fn ($q) => $q->where('slug', $gender))
             ->first();
 
-        $this->get(route("$gender.subcategory.show", [
-            'category' => $oppositeCategory,
-            'subcategory' => $oppositeSubcategory,
+        $uniqueSubcategory = Category::create([
+            'name' => 'Unique to '.$oppositeCategory->name,
+            'slug' => 'unique-to-'.$oppositeCategory->slug,
+            'depth' => 'subcategory',
+            'parent_id' => $oppositeCategory->id,
+            'is_active' => true,
+        ]);
+
+        $this->get(route('gender.subcategory.show', [
+            'gender' => $gender,
+            'category' => $category->slug,
+            'subcategory' => $uniqueSubcategory->slug, // Attempt to read property "slug" on null
         ]))->assertNotFound();
 
     })->with('genders');
@@ -88,10 +115,6 @@ describe('Subcategory page', function () {
             ->whereHas('parent', fn ($q) => $q->where('slug', $gender))
             ->first();
 
-        $subcategory = Category::where('depth', 'subcategory')
-            ->where('parent_id', $category->id)
-            ->first();
-
         $oppositeSubcategory = Category::where('depth', 'subcategory')
             ->whereHas('parent.parent', fn ($q) => $q->where('slug', $opposite))
             ->first();
@@ -101,9 +124,10 @@ describe('Subcategory page', function () {
             ->has(ProductVariant::factory(), 'variants')
             ->create();
 
-        $this->get(route("$gender.subcategory.show", [
-            'category' => $category,
-            'subcategory' => $subcategory,
+        $this->get(route('gender.subcategory.show', [
+            'gender' => $gender,
+            'category' => $category->slug,
+            'subcategory' => $oppositeSubcategory->slug,
         ]))->assertDontSeeText($product->name);
     })->with('genders');
 
@@ -113,8 +137,6 @@ describe('Subcategory page', function () {
             ->with('children')
             ->first();
 
-        $Subcategory = $category->children->first();
-
         $siblingSubcategory = $category->children->skip(1)->first();
 
         $siblingProduct = Product::factory()
@@ -122,9 +144,10 @@ describe('Subcategory page', function () {
             ->has(ProductVariant::factory(), 'variants')
             ->create();
 
-        $this->get(route("$gender.subcategory.show", [
-            $category,
-            $Subcategory,
+        $this->get(route('gender.subcategory.show', [
+            'gender' => $gender,
+            'category' => $category->slug,
+            'subcategory' => $category->children->first()->slug,
         ]))->assertDontSeeText($siblingProduct->name);
     })->with('genders');
 
@@ -142,9 +165,10 @@ describe('Subcategory page', function () {
             ->has(ProductVariant::factory(), 'variants')
             ->create();
 
-        $response = $this->get(route("$gender.subcategory.show", [
-            $category,
-            $subcategory,
+        $response = $this->get(route('gender.subcategory.show', [
+            'gender' => $gender,
+            'category' => $category->slug,
+            'subcategory' => $subcategory->slug,
         ]));
 
         $products->each(
@@ -158,11 +182,10 @@ describe('Subcategory page', function () {
             ->with('children')
             ->first();
 
-        $subcategory = $category->children->first();
-
-        $this->get(route("$gender.subcategory.show", [
-            $category,
-            $subcategory,
+        $this->get(route('gender.subcategory.show', [
+            'gender' => $gender,
+            'category' => $category->slug,
+            'subcategory' => $category->children->first()->slug,
         ]))->assertSeeText('No products available, stay tuned!.');
     })->with('genders');
 

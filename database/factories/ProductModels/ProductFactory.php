@@ -21,6 +21,7 @@ class ProductFactory extends Factory
     {
         return [
             'name' => $this->faker->words(3, true),
+            'slug' => str_replace('_', '-', $this->faker->words(3, true)),
             'description' => $this->faker->sentence(4),
             'category_id' => Category::doesntHave('children')->inRandomOrder()->first()->id,
             'fit_id' => Fit::inRandomOrder()->first()->id,

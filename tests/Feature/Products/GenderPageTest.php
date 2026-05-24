@@ -17,12 +17,12 @@ beforeEach(function () {
     ]);
 });
 
-dataset('genders', ['men', 'women']);
+dataset('genders', array_keys(CategorySeeder::$data));
 
 describe('Gender page', function () {
 
     it('renders the gender index page successfully', function (string $gender) {
-        $this->get(route("$gender.index"))->assertOk();
+        $this->get(route('gender.index', ['gender' => $gender]))->assertOk();
     })->with('genders');
 
     it('shows each product name that belongs to the gender', function (string $gender) {
@@ -36,7 +36,7 @@ describe('Gender page', function () {
             ->has(ProductVariant::factory(), 'variants')
             ->create();
 
-        $response = $this->get(route("$gender.index"));
+        $response = $this->get(route('gender.index', ['gender' => $gender]));
 
         $products->each(
             fn ($product) => $response->assertSeeText($product->name)
@@ -56,7 +56,7 @@ describe('Gender page', function () {
             ->has(ProductVariant::factory(), 'variants')
             ->create();
 
-        $response = $this->get(route("$gender.index"));
+        $response = $this->get(route('gender.index', ['gender' => $gender]));
 
         $oppositeProducts->each(
             fn ($product) => $response->assertDontSeeText($product->name)
@@ -64,7 +64,7 @@ describe('Gender page', function () {
     })->with('genders');
 
     it('shows the category navigation links for the gender', function (string $gender) {
-        $response = $this->get(route("$gender.index"));
+        $response = $this->get(route('gender.index', ['gender' => $gender]));
 
         Category::where('depth', 'category')
             ->whereHas('parent', fn ($q) => $q->where('slug', $gender))
@@ -73,8 +73,8 @@ describe('Gender page', function () {
     })->with('genders');
 
     it('shows an empty state message when no products exist', function (string $gender) {
-        $this->get(route("$gender.index"))
-            ->assertSeeText('No products available, stay tuned!.');
+        $this->get(route('gender.index', ['gender' => $gender]))
+            ->assertSeeText('No products yet — check back soon!');
     })->with('genders');
 
 });

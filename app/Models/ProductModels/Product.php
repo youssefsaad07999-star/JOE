@@ -45,6 +45,11 @@ class Product extends Model
         return $this->belongsTo(Fit::class);
     }
 
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
     public function scopeInCategory($query, Category $category)
     {
         return $query->whereIn('category_id', $category->getDescendantIds());

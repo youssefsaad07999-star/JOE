@@ -18,16 +18,5 @@ class ProductSeeder extends Seeder
             ->has(ProductVariant::factory()->count(rand(2, 5)), 'variants')
             ->create();
 
-        // Product::factory()
-        //     ->count(3)
-        //     ->create()
-        //     ->each(function ($product) {
-        //         ProductVariant::factory()
-        //             ->count(rand(2, 4))
-        //             ->create([
-        //                 'product_id' => $product->id,
-        //             ]);
-        //     });
-
     }
 }
