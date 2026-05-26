@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sizes', function (Blueprint $table) {
+        Schema::create('countries', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->enum('type', ['alpha', 'numeric']);
-            $table->integer('sort_order')->default(1);
+            $table->string('code', 2)->unique();   // ISO code, e.g. "EG"
+            $table->string('name');                // e.g. "Egypt"
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sizes');
+        Schema::dropIfExists('countries');
     }
 };

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\ProductModels\Product;
+use App\Models\ProductModels\ProductVariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -15,10 +15,12 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function products(): BelongsToMany
+    public function variants(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class)
+        return $this->belongsToMany(ProductVariant::class)
+            ->withPivot('quantity', 'unit_price', 'subtotal')
             ->withTimestamps();
+
     }
 
     public function address(): BelongsTo

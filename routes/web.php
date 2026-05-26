@@ -1,10 +1,11 @@
 <?php
 
 // use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProductControllers\CategoryController;
+use App\Http\Controllers\ProductControllers\CartItemController;
 use App\Http\Controllers\ProductControllers\GenderController;
-use App\Http\Controllers\ProductControllers\SubcategoryController;
 use App\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\SessionsController;
 use App\Models\ProductModels\Category;
@@ -24,6 +25,10 @@ Route::get('/about', function () {
 
 Route::group(['middleware' => 'auth'], function () {
     Route::post('/logout', [SessionsController::class, 'destroy']);
+
+    Route::get('/orders', [OrderController::class, 'index'])->name('order.index');
+
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 });
 
 Route::group(['middleware' => 'guest'], function () {
@@ -36,44 +41,26 @@ Route::group(['middleware' => 'guest'], function () {
 
 });
 
-// foreach (['men', 'women'] as $gender) {
-//     Route::prefix($gender)
-//         ->name("$gender.")
-//         ->group(function () use ($gender) {
-//             Route::get('/', [GenderController::class, 'show'])
-//                 ->defaults('gender', $gender)
-//                 ->name('index');
-
-//             Route::get('/{category}', [CategoryController::class, 'show'])
-//                 ->defaults('gender', $gender)
-//                 ->name('category.show');
-
-//             Route::get('/{category}/{subcategory}', [SubcategoryController::class, 'show'])
-//                 ->defaults('gender', $gender)
-//                 ->name('subcategory.show');
-//         });
-// }
+Route::get('/cart', [CartItemController::class, 'index'])->name('cart.index');
+Route::post('/cart', [CartItemController::class, 'store'])->name('cart.store');
+Route::patch('/cart/{cartItem}', [CartItemController::class, 'update'])->name('cart.update');
+Route::delete('/cart/{cartItem}', [CartItemController::class, 'destroy'])->name('cart.destroy');
+Route::delete('/cart', [CartItemController::class, 'clear'])->name('cart.clear');
 
 Route::prefix('{gender}')
     ->where(['gender' => '[a-z][a-z0-9-]*'])
     ->name('gender.')
     ->group(function () {
 
-        // Level 1: /men  /women  /unisex
         Route::get('/', [ProductController::class, 'genderIndex'])
             ->name('index');
 
-        // Level 2: /men/jackets  /women/dresses
         Route::get('/{category}', [ProductController::class, 'categoryShow'])
             ->name('category.show');
 
-        // Level 3: /men/jackets/leather
         Route::get('/{category}/{subcategory}', [ProductController::class, 'subcategoryShow'])
             ->name('subcategory.show');
 
-        // Level 4: /men/jackets/leather/42
-        // Note: {product} is an ID because products has no slug column.
-        // Add slug to products table for SEO-friendly URLs.
         Route::get('/{category}/{subcategory}/{product}', [ProductController::class, 'productShow'])
             ->name('product.show');
     });

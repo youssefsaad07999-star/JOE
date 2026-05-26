@@ -20,6 +20,10 @@ class SessionsController extends Controller
             'password' => ['required', 'string', 'min:8', 'max:255'],
         ]);
 
+        $oldSessionId = $request->session()->getId();
+
+        session(['guest_session_id' => $oldSessionId]);
+
         if (! Auth::attempt($attributes)) {
             return back()->withErrors([
                 'password' => 'Invalid credentials',
@@ -28,7 +32,6 @@ class SessionsController extends Controller
         }
 
         $request->session()->regenerate();
-        // generate session
 
         return redirect()->intended('/')->with('success', 'You are now logged in!');
     }

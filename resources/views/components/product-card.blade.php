@@ -31,10 +31,10 @@
         @endif
 
         {{-- Quick Add Overlay --}}
-        <div
+        {{-- <div
             class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end">
             <form action="" method="POST" class="w-full p-3">
-                {{-- {{ route('cart.store') }} --}}
+                {{ route('cart.store') }}
                 @csrf
                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                 <input type="hidden" name="quantity" value="1">
@@ -43,24 +43,22 @@
                     Quick Add
                 </button>
             </form>
-        </div>
+        </div> --}}
     </div>
 
     {{-- Info --}}
     <div class="p-4">
         <a href="{{ route('gender.product.show', ['gender' => $gender->slug, 'category' => $category->slug, 'subcategory' => $subcategory->slug, 'product' => $product->slug]) }}"
             class="block">
-            {{-- {{ route($gender . '.product.show', $product) }} --}}
             <h3
                 class="font-medium text-[#1C1C1C] text-sm leading-snug group-hover:text-[#C85C6E] transition-colors truncate">
                 {{ $product->name }}
             </h3>
             <div class="flex items-center gap-2 mt-1.5">
                 @if(isset($product->original_price) && $product->original_price > $product->price)
-                    <span
-                        class="text-gray-400 text-xs line-through">${{ number_format($product->original_price, 2) }}</span>
+                    <span class="text-gray-400 text-xs line-through">${{ number_format($product->base_price, 2) }}</span>
                 @endif
-                <span class="font-semibold text-[#1C1C1C] text-sm">${{ number_format($product->price, 2) }}</span>
+                <span class="font-semibold text-[#1C1C1C] text-sm">${{ number_format($product->base_price, 2) }}</span>
             </div>
         </a>
     </div>

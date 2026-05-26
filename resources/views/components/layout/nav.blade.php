@@ -45,7 +45,7 @@
 
                                     <a href="{{ route('gender.category.show', [$navGender, $navCategory]) }}"
                                         class="flex items-center justify-between px-4 py-2.5 text-sm
-                                                                                       hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors"
+                                                                                                                                                       hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors"
                                         :class="subOpen ? 'bg-[#F7F3EE] text-[#C85C6E]' : ''">
                                         {{ $navCategory->name }}
                                         @if($navCategory->children->count() > 0)
@@ -71,14 +71,14 @@
                                                 {{-- "All [category]" shortcut --}}
                                                 <a href="{{ route('gender.category.show', [$navGender, $navCategory]) }}"
                                                     class="block px-4 py-2 text-xs font-medium text-gray-400
-                                                                                                                       hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors
-                                                                                                                       border-b border-gray-100 mb-1">
+                                                                                                                                                                                                                       hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors
+                                                                                                                                                                                                                       border-b border-gray-100 mb-1">
                                                     All {{ $navCategory->name }}
                                                 </a>
                                                 @foreach($navCategory->children as $navSubcategory)
                                                     <a href="{{ route('gender.subcategory.show', [$navGender, $navCategory, $navSubcategory]) }}"
                                                         class="block px-4 py-2 text-sm
-                                                                                                                                               hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors">
+                                                                                                                                                                                                                                                                               hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors">
                                                         {{ $navSubcategory->name }}
                                                     </a>
                                                 @endforeach
@@ -107,7 +107,7 @@
         <div class="flex items-center gap-2">
             @auth
                 <div class="hidden md:flex items-center gap-2">
-                    <a href="{{ route('orders.index') }}"
+                    <a href="{{ route('order.index') }}"
                         class="px-3 py-1.5 text-sm font-light text-gray-300 hover:text-white transition-colors">
                         Orders
                     </a>
@@ -139,8 +139,9 @@
                         d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
                 @if(isset($cartCount) && $cartCount > 0)
-                    <span class="absolute -top-0.5 -right-0.5 bg-[#C85C6E] text-white text-[10px] font-bold
-                                                     rounded-full flex items-center justify-center"
+                    <span
+                        class="absolute -top-0.5 -right-0.5 bg-[#C85C6E] text-white text-[10px] font-bold
+                                                                                     rounded-full flex items-center justify-center"
                         style="min-width:18px;min-height:18px;padding:0 4px;">
                         {{ $cartCount }}
                     </span>
@@ -171,7 +172,7 @@
                 <div x-data="{ gOpen: false }">
                     {{-- Gender row --}}
                     <button @click="gOpen = !gOpen" class="w-full text-left py-2.5 text-sm font-light hover:text-[#C85C6E] transition-colors
-                                                       flex items-center justify-between">
+                                                                                       flex items-center justify-between">
                         {{ $navGender->name }}
                         <svg class="w-4 h-4 transition-transform" :class="gOpen ? 'rotate-180' : ''" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
@@ -185,7 +186,7 @@
                                 {{-- Category row --}}
                                 <button @click="cOpen = !cOpen"
                                     class="w-full text-left py-2 text-sm text-gray-300 hover:text-[#C85C6E]
-                                                                                       transition-colors flex items-center justify-between">
+                                                                                                                                                       transition-colors flex items-center justify-between">
                                     {{ $navCategory->name }}
                                     @if($navCategory->children->count() > 0)
                                         <svg class="w-3.5 h-3.5 transition-transform" :class="cOpen ? 'rotate-180' : ''" fill="none"
@@ -230,7 +231,7 @@
 
             <div class="pt-3 border-t border-white/10 flex gap-3">
                 @auth
-                    <a href="{{ route('orders.index') }}"
+                    <a href="{{ route('order.index') }}"
                         class="text-sm text-gray-400 hover:text-white transition-colors">Orders</a>
                     <form action="/logout" method="POST">
                         @csrf

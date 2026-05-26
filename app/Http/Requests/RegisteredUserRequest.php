@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class RegisteredUserRequest extends FormRequest
 {
@@ -25,10 +24,12 @@ class RegisteredUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique(User::class)],
-            'age' => ['required', 'integer'],
-            'password' => ['required', 'string', 'min:8', 'max:255'],
+            'name' => 'required|string|max:255',
+            'date_of_birth' => 'required|date|before:today',
+            'phone_number' => 'required|string|max:11',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8|confirmed',
+            'terms' => 'accepted',
         ];
     }
 }

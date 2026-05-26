@@ -74,7 +74,7 @@
         </div>
         <div class="grid md:grid-cols-2 gap-6">
             @foreach($genders as $gender)
-                <a href="{{ route('gender.index', ['gender' => $gender->slug]) }}"
+                <a href="{{ route('gender.index', ['gender' => $gender->slug], false) }}"
                     class="group relative h-[400px] rounded-3xl overflow-hidden bg-gray-200 block">
                     <img src="{{ asset('images/' . $gender->slug . '.jpg') }}"
                         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"

@@ -30,26 +30,69 @@
             <div class="w-full max-w-md">
 
                 <div class="mb-8">
-                    <p class="text-[#C85C6E] text-xs font-semibold tracking-[0.3em] uppercase mb-2">Get Started</p>
+                    <p class="text-[#C85C6E] text-xs font-semibold tracking-[0.3em] uppercase mb-2">
+                        Get Started
+                    </p>
                     <h1 class="font-['Cormorant_Garamond'] text-4xl font-light">Create Account</h1>
                 </div>
 
                 <form action="/register" method="POST" class="space-y-4">
                     @csrf
-                    <x-form.field name="name" title="Full Name" placeholder="Your name" />
-                    <x-form.field name="age" title="Age" type="number" placeholder="25" />
+
+                    {{-- name → users.name --}}
+                    <x-form.field name="name" title="Full Name" placeholder="John Doe" />
+
+                    {{-- date_of_birth → users.date_of_birth (date column) --}}
+                    <x-form.field name="date_of_birth" title="Date of Birth" type="date" placeholder="" />
+
+                    {{-- phone_number → users.phone_number --}}
+                    <x-form.field name="phone_number" title="Phone Number" type="tel" placeholder="+20 10 1234 5678" />
+
+                    {{-- email → users.email --}}
                     <x-form.field name="email" title="Email Address" type="email" placeholder="you@example.com" />
 
+                    {{-- password + strength meter --}}
                     <div>
                         <x-form.field name="password" title="Password" type="password"
                             placeholder="Min. 8 characters" />
-                        <div class="mt-2 flex gap-1.5" id="password-strength">
-                            @for($i = 0; $i < 4; $i++)
-                                <div class="h-1 flex-1 rounded-full bg-gray-200"></div>
-                            @endfor
+
+                        {{-- Strength bar — driven by Alpine watching the input --}}
+                        <div class="mt-2" x-data="{
+                                strength: 0,
+                                check(val) {
+                                    let s = 0;
+                                    if (val.length >= 8)           s++;
+                                    if (/[A-Z]/.test(val))         s++;
+                                    if (/[0-9]/.test(val))         s++;
+                                    if (/[^A-Za-z0-9]/.test(val)) s++;
+                                    this.strength = s;
+                                }
+                            }">
+                            <div class="flex gap-1.5"
+                                x-on:input.window="check($event.target.name === 'password' ? $event.target.value : '')">
+                                @for($i = 1; $i <= 4; $i++)
+                                    <div class="h-1 flex-1 rounded-full transition-colors duration-300" :class="{
+                                                                 'bg-red-400':    strength >= {{ $i }} && strength === 1,
+                                                                 'bg-amber-400':  strength >= {{ $i }} && strength === 2,
+                                                                 'bg-yellow-400': strength >= {{ $i }} && strength === 3,
+                                                                 'bg-emerald-400':strength >= {{ $i }} && strength === 4,
+                                                                 'bg-gray-200':   strength < {{ $i }}
+                                                             }">
+                                    </div>
+                                @endfor
+                            </div>
+                            <p class="text-xs mt-1 transition-colors" :class="{
+                                   'text-red-400':     strength === 1,
+                                   'text-amber-400':   strength === 2,
+                                   'text-yellow-500':  strength === 3,
+                                   'text-emerald-500': strength === 4,
+                                   'text-transparent': strength === 0
+                               }" x-text="['','Weak','Fair','Good','Strong'][strength]">
+                            </p>
                         </div>
                     </div>
 
+                    {{-- password_confirmation — not stored, used for validation only --}}
                     <x-form.field name="password_confirmation" title="Confirm Password" type="password"
                         placeholder="Repeat your password" />
 
@@ -62,9 +105,10 @@
                             <a href="#" class="text-[#C85C6E] underline">Privacy Policy</a>
                         </span>
                     </label>
+                    <x-form.error name="terms" />
 
                     <button type="submit" class="w-full bg-[#1C1C1C] text-white py-4 rounded-full font-medium
-                                   hover:bg-[#C85C6E] transition-colors duration-300 text-sm tracking-wide mt-2">
+                               hover:bg-[#C85C6E] transition-colors duration-300 text-sm tracking-wide mt-2">
                         Create Account
                     </button>
                 </form>

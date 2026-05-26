@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use App\Listeners\MergeGuestCart;
+use App\Models\ProductModels\CartItem;
 use App\Models\ProductModels\Category;
 use App\Models\ProductModels\Product;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -24,12 +28,26 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(Login::class, MergeGuestCart::class);
+
+        View::composer('components.layout.layout', function ($view) {
+            $query = CartItem::query();
+
+            $cartItems = auth()->check()
+            ? $query->forUser(auth()->id())->with('variant.product')->get()
+            : $query->forSession(session()->getId())->with('variant.product')->get();
+
+            $cartTotal = $cartItems->sum->line_total;
+
+            $view->with(compact('cartItems', 'cartTotal'));
+        });
         Blade::if('active', function ($routeName) {
             return Route::is($routeName);
         });
 
         $this->registerRouteBindings();
         $this->registerViewComposers();
+
     }
 
     private function registerRouteBindings(): void

@@ -14,8 +14,11 @@
 </head>
 
 <body class="bg-[#F7F3EE] text-[#1C1C1C] flex flex-col min-h-screen font-['DM_Sans']"
-  x-data="{ cartOpen: false, mobileMenuOpen: false }">
-
+  x-data="{ cartOpen: false, mobileMenuOpen: false }"
+  x-init="
+    cartOpen = localStorage.getItem('cartOpen') === 'true';
+    $watch('cartOpen', val => localStorage.setItem('cartOpen', val));
+  ">
   {{-- CART SIDEBAR OVERLAY --}}
   <div x-show="cartOpen" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
     x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
@@ -24,15 +27,19 @@
   </div>
 
   {{-- CART SIDEBAR --}}
-  <div x-show="cartOpen" x-transition:enter="transition ease-out duration-300"
-    x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
-    x-transition:leave="transition ease-in duration-200" x-transition:leave-start="translate-x-0"
-    x-transition:leave-end="translate-x-full"
-    class="fixed right-0 top-0 h-full w-full max-w-sm bg-white z-50 flex flex-col shadow-2xl" style="display:none;">
+  <div x-show="cartOpen" 
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 translate-x-full" 
+    x-transition:enter-end="opacity-100 translate-x-0"
+    x-transition:leave="transition ease-in duration-200" 
+    x-transition:leave-start="opacity-100 translate-x-0"
+    x-transition:leave-end="opacity-0 translate-x-full"
+    style="display:none;"
+    class="fixed right-0 top-0 h-full w-full max-w-sm bg-white z-50 flex flex-col shadow-2xl" >
     {{-- Cart Header --}}
     <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
       <h2 class="font-['Cormorant_Garamond'] text-2xl font-semibold">Your Cart</h2>
-      <button @click="cartOpen = false" class="p-2 hover:bg-gray-100 rounded-full transition">
+      <button @click="cartOpen = false" class="p-2 hover:bg-gray-100 rounded-full transition"  x-cloak >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
@@ -45,9 +52,9 @@
         @foreach($cartItems as $item)
           <div class="flex gap-4 py-4 border-b border-gray-100">
             <div class="w-20 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-              @if($item->product->image)
-                <img src="{{ asset('storage/' . $item->product->image) }}" class="w-full h-full object-cover"
-                  alt="{{ $item->product->name }}">
+              @if($item->variant->images)
+                <img src="{{ asset('storage/' . $item->variant->images) }}" class="w-full h-full object-cover"
+                  alt="{{ $item->variant->product->name }}">
               @else
                 <div class="w-full h-full bg-gray-200 flex items-center justify-center">
                   <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,26 +65,38 @@
               @endif
             </div>
             <div class="flex-1 min-w-0">
-              <p class="font-medium text-sm truncate">{{ $item->product->name }}</p>
-              <p class="text-gray-500 text-xs mt-0.5">{{ $item->size ?? 'One Size' }} · {{ $item->color ?? '' }}</p>
+              <p class="font-medium text-sm truncate">{{ $item->variant->product->name }}</p>
+              <p class="text-gray-500 text-xs mt-0.5">{{ $item->variant->size->name ?? 'One Size' }} · {{ ucfirst($item->variant->color->name) ?? '' }}</p>
               <div class="flex items-center justify-between mt-2">
                 <div class="flex items-center border border-gray-200 rounded-full">
-                  <form action="{{ route('cart.decrease', $item) }}" method="POST">
-                    @csrf @method('PATCH')
-                    <button type="submit"
-                      class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-black transition">−</button>
-                  </form>
+                  <form action="{{ route('cart.update', ['cartItem' => $item]) }}"
+                  method="POST">
+                @csrf @method('PATCH')
+                <input type="hidden" name="quantity"
+                       value="{{ max(1, $item->quantity - 1) }}">
+                <button type="submit"
+                        class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-black transition"
+                        @if($item->quantity <= 1) disabled @endif>
+                    −
+                </button>
+            </form>
                   <span class="w-6 text-center text-sm">{{ $item->quantity }}</span>
-                  <form action="{{ route('cart.increase', $item) }}" method="POST">
-                    @csrf @method('PATCH')
-                    <button type="submit"
-                      class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-black transition">+</button>
-                  </form>
+                  <form action="{{ route('cart.update', ['cartItem' => $item]) }}"
+                  method="POST">
+                @csrf @method('PATCH')
+                <input type="hidden" name="quantity"
+                       value="{{ $item->quantity + 1 }}">
+                <button type="submit"
+                        class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-black transition"
+                        @if($item->quantity >= $item->variant->stock_quantity) disabled @endif>
+                    +
+                </button>
+            </form>
                 </div>
-                <p class="font-semibold text-sm">${{ number_format($item->product->price * $item->quantity, 2) }}</p>
+                <p class="font-semibold text-sm">${{ number_format(($item->variant->product->base_price + $item->variant->price_override) * $item->quantity, 2) }}</p>
               </div>
             </div>
-            <form action="{{ route('cart.remove', $item) }}" method="POST">
+            <form action="{{ route('cart.destroy', $item) }}" method="POST">
               @csrf @method('DELETE')
               <button type="submit" class="text-gray-300 hover:text-rose-500 transition mt-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,7 +125,8 @@
           <span class="text-gray-600">Subtotal</span>
           <span class="font-semibold text-lg">${{ number_format($cartTotal ?? 0, 2) }}</span>
         </div>
-        <a href="{{ route('checkout.index') }}"
+        <a href=""
+        {{-- {{ route('checkout.index') }} --}}
           class="block w-full bg-[#1C1C1C] text-white text-center py-3.5 rounded-full font-medium hover:bg-[#C85C6E] transition-colors duration-300">
           Proceed to Checkout
         </a>

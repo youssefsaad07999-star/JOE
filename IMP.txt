@@ -1,0 +1,31 @@
+Things that can be added to shop_settings table to improve system 
+
+Free shipping threshold  
+Minimum subtotal required for free shipping.
+
+Default shipping country  
+Useful if most customers are from one region.
+
+Tax rate  
+Global VAT or sales tax percentage (unless you need per‑country tax tables).
+
+Currency  
+Default currency code (USD, EUR, EGP).
+
+Order expiration time  
+How long unpaid orders remain before being auto‑cancelled.
+
+Return policy days  
+Number of days customers can return items.
+
+Support email  
+Contact email shown in checkout and order confirmation.
+
+Payment gateways enabled  
+Flags for enabling/disabling PayPal, Stripe, COD.
+
+Discount rules  
+Global percentage discounts or seasonal promotions.
+
+Shop name & branding  
+Store name, tagline, or logo path for invoices and emails.

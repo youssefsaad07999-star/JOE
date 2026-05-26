@@ -28,11 +28,13 @@ class SizeSeeder extends Seeder
             '35' => 'numeric',
             '36' => 'numeric',
         ];
-
+        $sort_order = 1;
         foreach ($sizes as $name => $type) {
+
             Size::factory()->create([
                 'name' => $name,
                 'type' => $type,
+                'sort_order' => $sort_order++,
             ]);
         }
 
