@@ -23,7 +23,7 @@
                     <h1 class="font-['Cormorant_Garamond'] text-4xl font-light">Sign In</h1>
                 </div>
 
-                <form action="/login" method="POST" class="space-y-5">
+                <form action="{{ route('login') }}" method="POST" class="space-y-5">
                     @csrf
                     <x-form.field name="email" title="Email Address" type="email" placeholder="you@example.com" />
                     <x-form.field name="password" title="Password" type="password" placeholder="••••••••" />
@@ -34,12 +34,13 @@
                                 class="rounded border-gray-300 text-[#C85C6E] focus:ring-[#C85C6E]">
                             <span class="text-sm text-gray-600">Remember me</span>
                         </label>
-                        <a href="" class="text-sm text-[#C85C6E] hover:underline">Forgot
+                        <a href="{{ route('password.request') }}" class="text-sm text-[#C85C6E] hover:underline">Forgot
                             password?</a>
-                        {{-- {{ route('password.request') }} --}}
+
                     </div>
 
-                    <button type="submit" class="w-full bg-[#1C1C1C] text-white py-4 rounded-full font-medium
+                    <button type="submit"
+                        class="w-full bg-[#1C1C1C] text-white py-4 rounded-full font-medium
                                    hover:bg-[#C85C6E] transition-colors duration-300 text-sm tracking-wide mt-2">
                         Sign In
                     </button>
@@ -47,7 +48,8 @@
 
                 <p class="text-center text-gray-500 text-sm mt-6">
                     Don't have an account?
-                    <a href="/register" class="text-[#C85C6E] font-medium hover:underline ml-1">Create one</a>
+                    <a href="{{ route('register') }}" class="text-[#C85C6E] font-medium hover:underline ml-1">Create
+                        one</a>
                 </p>
 
             </div>

@@ -3,6 +3,7 @@
 namespace App\Models\ProductModels;
 
 use App\Models\Order;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,6 +36,19 @@ class Product extends Model
         return $this->hasMany(ProductImage::class);
     }
 
+    public function globalImages()
+    {
+        return $this->hasMany(ProductImage::class)
+            ->whereNull('color_id')
+            ->orderBy('sort_order');
+    }
+
+    public function primaryImage()
+    {
+        return $this->hasMany(ProductImage::class)
+            ->where('is_primary', true);
+    }
+
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
@@ -53,5 +67,10 @@ class Product extends Model
     public function scopeInCategory($query, Category $category)
     {
         return $query->whereIn('category_id', $category->getDescendantIds());
+    }
+
+    public function scopeIsActive(Builder $q)
+    {
+        return $q->where('is_active', true);
     }
 }

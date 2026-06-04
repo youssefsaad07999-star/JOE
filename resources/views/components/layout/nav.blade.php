@@ -9,16 +9,19 @@
 
         {{-- DESKTOP LINKS --}}
         <div class="hidden md:flex items-center gap-1">
-            <a href="/" class="px-4 py-2 text-sm font-light tracking-wide hover:text-[#C85C6E] transition-colors
-                      @active('home') text-[#C85C6E] @endactive">
+            <a href="/"
+                class="px-4 py-2 text-sm font-light tracking-wide hover:text-[#C85C6E] transition-colors
+                      @active('home')
+text-[#C85C6E]
+@endactive">
                 Home
             </a>
 
-            @foreach($navGenders as $navGender)
+            @foreach ($navGenders as $navGender)
                 <div class="relative" x-data="{ open: false }" @mouseenter="open = true" @mouseleave="open = false">
 
                     {{-- Gender link --}}
-                    <a href="{{ route('gender.index', $navGender) }}"
+                    <a href="{{ route('gender.index', $navGender, false) }}"
                         class="px-4 py-2 text-sm font-light tracking-wide hover:text-[#C85C6E] transition-colors flex items-center gap-1">
                         {{ $navGender->name }}
                         <svg class="w-3.5 h-3.5 opacity-60 transition-transform duration-200"
@@ -37,20 +40,19 @@
                         style="display:none; min-width: 180px;">
 
                         <div class="bg-white text-[#1C1C1C] rounded-xl shadow-xl py-2 border border-gray-100">
-                            @foreach($navGender->children as $navCategory)
-
+                            @foreach ($navGender->children as $navCategory)
                                 {{-- Each category row — hover reveals subcategory flyout --}}
                                 <div class="relative" x-data="{ subOpen: false }" @mouseenter="subOpen = true"
                                     @mouseleave="subOpen = false">
 
-                                    <a href="{{ route('gender.category.show', [$navGender, $navCategory]) }}"
+                                    <a href="{{ route('gender.category.show', [$navGender, $navCategory], false) }}"
                                         class="flex items-center justify-between px-4 py-2.5 text-sm
-                                                                                                                                                       hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors"
+                                                                                                                                                                                                                       hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors"
                                         :class="subOpen ? 'bg-[#F7F3EE] text-[#C85C6E]' : ''">
                                         {{ $navCategory->name }}
-                                        @if($navCategory->children->count() > 0)
-                                            <svg class="w-3.5 h-3.5 opacity-50 flex-shrink-0 ml-4" fill="none" stroke="currentColor"
-                                                viewBox="0 0 24 24">
+                                        @if ($navCategory->children->count() > 0)
+                                            <svg class="w-3.5 h-3.5 opacity-50 flex-shrink-0 ml-4" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M9 5l7 7-7 7" />
                                             </svg>
@@ -58,27 +60,29 @@
                                     </a>
 
                                     {{-- Level 2 flyout — subcategories --}}
-                                    @if($navCategory->children->count() > 0)
+                                    @if ($navCategory->children->count() > 0)
                                         <div x-show="subOpen" x-transition:enter="transition ease-out duration-100"
                                             x-transition:enter-start="opacity-0 translate-x-1"
                                             x-transition:enter-end="opacity-100 translate-x-0"
                                             x-transition:leave="transition ease-in duration-75"
                                             x-transition:leave-start="opacity-100 translate-x-0"
                                             x-transition:leave-end="opacity-0 translate-x-1"
-                                            class="absolute left-full top-0 pl-1 z-50" style="display:none; min-width: 160px;">
+                                            class="absolute left-full top-0 pl-1 z-50"
+                                            style="display:none; min-width: 160px;">
 
-                                            <div class="bg-white text-[#1C1C1C] rounded-xl shadow-xl py-2 border border-gray-100">
+                                            <div
+                                                class="bg-white text-[#1C1C1C] rounded-xl shadow-xl py-2 border border-gray-100">
                                                 {{-- "All [category]" shortcut --}}
-                                                <a href="{{ route('gender.category.show', [$navGender, $navCategory]) }}"
+                                                <a href="{{ route('gender.category.show', [$navGender, $navCategory], false) }}"
                                                     class="block px-4 py-2 text-xs font-medium text-gray-400
-                                                                                                                                                                                                                       hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors
-                                                                                                                                                                                                                       border-b border-gray-100 mb-1">
+                                                                                                                                                                                                                                                                                                                       hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors
+                                                                                                                                                                                                                                                                                                                       border-b border-gray-100 mb-1">
                                                     All {{ $navCategory->name }}
                                                 </a>
-                                                @foreach($navCategory->children as $navSubcategory)
-                                                    <a href="{{ route('gender.subcategory.show', [$navGender, $navCategory, $navSubcategory]) }}"
+                                                @foreach ($navCategory->children as $navSubcategory)
+                                                    <a href="{{ route('gender.subcategory.show', [$navGender, $navCategory, $navSubcategory], false) }}"
                                                         class="block px-4 py-2 text-sm
-                                                                                                                                                                                                                                                                               hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors">
+                                                                                                                                                                                                                                                                                                                                                                                                               hover:bg-[#F7F3EE] hover:text-[#C85C6E] transition-colors">
                                                         {{ $navSubcategory->name }}
                                                     </a>
                                                 @endforeach
@@ -86,32 +90,43 @@
                                         </div>
                                     @endif
                                 </div>
-
                             @endforeach
                         </div>
                     </div>
                 </div>
             @endforeach
 
-            <a href="/about" class="px-4 py-2 text-sm font-light tracking-wide hover:text-[#C85C6E] transition-colors
-                      @active('about') text-[#C85C6E] @endactive">
+            <a href="/about"
+                class="px-4 py-2 text-sm font-light tracking-wide hover:text-[#C85C6E] transition-colors
+                      @active('about')
+text-[#C85C6E]
+@endactive">
                 About
             </a>
-            <a href="/contact" class="px-4 py-2 text-sm font-light tracking-wide hover:text-[#C85C6E] transition-colors
-                      @active('contact') text-[#C85C6E] @endactive">
+            <a href="/contact"
+                class="px-4 py-2 text-sm font-light tracking-wide hover:text-[#C85C6E] transition-colors
+                      @active('contact')
+text-[#C85C6E]
+@endactive">
                 Contact
             </a>
         </div>
 
         {{-- RIGHT ICONS --}}
         <div class="flex items-center gap-2">
+            @admin
+                <a href="{{ route('admin.dashboard') }}"
+                    class="px-3 py-1.5 text-sm font-light text-gray-300 hover:text-white transition-colors">
+                    Admin
+                </a>
+            @endadmin
             @auth
                 <div class="hidden md:flex items-center gap-2">
-                    <a href="{{ route('order.index') }}"
+                    <a href="{{ route('orders.index') }}"
                         class="px-3 py-1.5 text-sm font-light text-gray-300 hover:text-white transition-colors">
                         Orders
                     </a>
-                    <form action="/logout" method="POST">
+                    <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit"
                             class="px-4 py-1.5 text-sm border border-white/20 rounded-full hover:border-white/60 transition-colors font-light">
@@ -121,11 +136,11 @@
                 </div>
             @else
                 <div class="hidden md:flex items-center gap-2">
-                    <a href="/login"
+                    <a href="{{ route('login') }}"
                         class="px-4 py-1.5 text-sm font-light text-gray-300 hover:text-white transition-colors">
                         Sign In
                     </a>
-                    <a href="/register"
+                    <a href="{{ route('register') }}"
                         class="px-4 py-1.5 text-sm bg-[#C85C6E] rounded-full hover:bg-[#b54e60] transition-colors font-medium">
                         Sign Up
                     </a>
@@ -138,10 +153,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                         d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
-                @if(isset($cartCount) && $cartCount > 0)
+                @if (isset($cartCount) && $cartCount > 0)
                     <span
                         class="absolute -top-0.5 -right-0.5 bg-[#C85C6E] text-white text-[10px] font-bold
-                                                                                     rounded-full flex items-center justify-center"
+                                                                                                                     rounded-full flex items-center justify-center"
                         style="min-width:18px;min-height:18px;padding:0 4px;">
                         {{ $cartCount }}
                     </span>
@@ -168,29 +183,32 @@
         <div class="px-6 py-4 space-y-1">
             <a href="/" class="block py-2.5 text-sm font-light hover:text-[#C85C6E] transition-colors">Home</a>
 
-            @foreach($navGenders as $navGender)
+            @foreach ($navGenders as $navGender)
                 <div x-data="{ gOpen: false }">
                     {{-- Gender row --}}
-                    <button @click="gOpen = !gOpen" class="w-full text-left py-2.5 text-sm font-light hover:text-[#C85C6E] transition-colors
-                                                                                       flex items-center justify-between">
+                    <button @click="gOpen = !gOpen"
+                        class="w-full text-left py-2.5 text-sm font-light hover:text-[#C85C6E] transition-colors
+                                                                                                                       flex items-center justify-between">
                         {{ $navGender->name }}
                         <svg class="w-4 h-4 transition-transform" :class="gOpen ? 'rotate-180' : ''" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
 
                     <div x-show="gOpen" class="pl-3 border-l border-white/10 ml-1 space-y-0.5" style="display:none;">
-                        @foreach($navGender->children as $navCategory)
+                        @foreach ($navGender->children as $navCategory)
                             <div x-data="{ cOpen: false }">
                                 {{-- Category row --}}
                                 <button @click="cOpen = !cOpen"
                                     class="w-full text-left py-2 text-sm text-gray-300 hover:text-[#C85C6E]
-                                                                                                                                                       transition-colors flex items-center justify-between">
+                                                                                                                                                                                                                       transition-colors flex items-center justify-between">
                                     {{ $navCategory->name }}
-                                    @if($navCategory->children->count() > 0)
-                                        <svg class="w-3.5 h-3.5 transition-transform" :class="cOpen ? 'rotate-180' : ''" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
+                                    @if ($navCategory->children->count() > 0)
+                                        <svg class="w-3.5 h-3.5 transition-transform"
+                                            :class="cOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M19 9l-7 7-7-7" />
                                         </svg>
@@ -198,26 +216,27 @@
                                 </button>
 
                                 {{-- Subcategory list --}}
-                                @if($navCategory->children->count() > 0)
-                                                <div x-show="cOpen" class="pl-3 border-l border-white/10 ml-1 pb-1" style="display:none;">
-                                                    <a href="{{ route('gender.category.show', [
-                                        'gender' => $navGender,
-                                        'category' => $navCategory
-                                    ]) }}"
-                                                        class="block py-1.5 text-xs text-gray-500 hover:text-[#C85C6E] transition-colors">
-                                                        All {{ $navCategory->name }}
-                                                    </a>
-                                                    @foreach($navCategory->children as $navSubcategory)
-                                                                    <a href="{{ route('gender.subcategory.show', [
-                                                            'gender' => $navGender,
-                                                            'category' => $navCategory,
-                                                            'subcategory' => $navSubcategory
-                                                        ]) }}"
-                                                                        class="block py-1.5 text-sm text-gray-400 hover:text-[#C85C6E] transition-colors">
-                                                                        {{ $navSubcategory->name }}
-                                                                    </a>
-                                                    @endforeach
-                                                </div>
+                                @if ($navCategory->children->count() > 0)
+                                    <div x-show="cOpen" class="pl-3 border-l border-white/10 ml-1 pb-1"
+                                        style="display:none;">
+                                        <a href="{{ route('gender.category.show', [
+                                            'gender' => $navGender,
+                                            'category' => $navCategory,
+                                        ]) }}"
+                                            class="block py-1.5 text-xs text-gray-500 hover:text-[#C85C6E] transition-colors">
+                                            All {{ $navCategory->name }}
+                                        </a>
+                                        @foreach ($navCategory->children as $navSubcategory)
+                                            <a href="{{ route('gender.subcategory.show', [
+                                                'gender' => $navGender,
+                                                'category' => $navCategory,
+                                                'subcategory' => $navSubcategory,
+                                            ]) }}"
+                                                class="block py-1.5 text-sm text-gray-400 hover:text-[#C85C6E] transition-colors">
+                                                {{ $navSubcategory->name }}
+                                            </a>
+                                        @endforeach
+                                    </div>
                                 @endif
                             </div>
                         @endforeach
@@ -231,16 +250,17 @@
 
             <div class="pt-3 border-t border-white/10 flex gap-3">
                 @auth
-                    <a href="{{ route('order.index') }}"
+                    <a href="{{ route('orders.index') }}"
                         class="text-sm text-gray-400 hover:text-white transition-colors">Orders</a>
-                    <form action="/logout" method="POST">
+                    <form action="{{ route('logout') }}" method="POST">
                         @csrf
                         <button type="submit" class="text-sm text-gray-400 hover:text-white transition-colors">Sign
                             Out</button>
                     </form>
                 @else
-                    <a href="/login" class="text-sm text-gray-400 hover:text-white transition-colors">Sign In</a>
-                    <a href="/register"
+                    <a href="{{ route('login') }}" class="text-sm text-gray-400 hover:text-white transition-colors">Sign
+                        In</a>
+                    <a href="{{ route('register') }}"
                         class="text-sm bg-[#C85C6E] text-white px-4 py-1.5 rounded-full hover:bg-[#b54e60] transition-colors">Sign
                         Up</a>
                 @endauth

@@ -2,16 +2,22 @@
 
 namespace App\Providers;
 
+use App\Listeners\HandlePaddleTransactionCompleted;
+use App\Listeners\HandlePaddleTransactionUpdated;
 use App\Listeners\MergeGuestCart;
+use App\Models\Order;
 use App\Models\ProductModels\CartItem;
 use App\Models\ProductModels\Category;
 use App\Models\ProductModels\Product;
+use App\Models\User;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Paddle\Events\TransactionCompleted;
+use Laravel\Paddle\Events\TransactionUpdated;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,21 +34,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(TransactionCompleted::class, HandlePaddleTransactionCompleted::class);
+        Event::listen(TransactionUpdated::class, HandlePaddleTransactionUpdated::class);
+
         Event::listen(Login::class, MergeGuestCart::class);
 
-        View::composer('components.layout.layout', function ($view) {
-            $query = CartItem::query();
-
-            $cartItems = auth()->check()
-            ? $query->forUser(auth()->id())->with('variant.product')->get()
-            : $query->forSession(session()->getId())->with('variant.product')->get();
-
-            $cartTotal = $cartItems->sum->line_total;
-
-            $view->with(compact('cartItems', 'cartTotal'));
-        });
         Blade::if('active', function ($routeName) {
             return Route::is($routeName);
+        });
+
+        Blade::if('admin', function () {
+            return auth()->check()
+            && auth()->user()->role === 'admin';
         });
 
         $this->registerRouteBindings();
@@ -73,7 +76,7 @@ class AppServiceProvider extends ServiceProvider
                 ->active()
                 ->where('slug', $slug)
                 ->where('parent_id', $gender->id)
-                ->firstOrFail();
+                ->first();
         });
 
         /*
@@ -90,40 +93,74 @@ class AppServiceProvider extends ServiceProvider
                 ->firstOrFail();
         });
 
-        /*
-         * {product} — products table has no slug column.
-         * We use the numeric ID but validate it belongs to the subcategory
-         * so /men/jackets/leather/999 cannot show a dress.
-         *
-         * TIP: Add a `slug` column to products and change this to slug lookup
-         * for SEO-friendly URLs like /men/jackets/leather/black-biker-jacket
-         */
+        Route::bind('adminCategory', function (string $id) {
+            return Category::findOrFail($id); // plain ID lookup, no scope
+        });
+
         Route::bind('product', function (string $slug) {
             $subcategory = request()->route('subcategory');
 
-            return Product::with(['variants.size', 'variants.color', 'images', 'fit', 'brand'])
+            if ($subcategory) {
+                return Product::with(['variants.size', 'variants.color', 'images', 'primaryImage', 'fit', 'brand'])
+                    ->where('slug', $slug)
+                    ->where('category_id', $subcategory->id)
+                    ->first();
+            }
+
+            return Product::with(['variants.size', 'variants.color', 'images', 'primaryImage', 'fit', 'brand'])
                 ->where('slug', $slug)
-                ->where('category_id', $subcategory->id)
-                ->firstOrFail();
+                ->first();
+        });
+
+        Route::bind('order', function (int $id) {
+            return Order::with([
+                'variants.product.fit',
+                'variants.product.images',
+                'variants.size',
+                'variants.color',
+                'address',
+                'payment',
+                'user',
+            ])->findOrFail($id);
+
+        });
+        // orders addresses
+        Route::bind('user', function (string $id) {
+            return User::with(['addresses'])->findOrFail($id);
         });
     }
 
     private function registerViewComposers(): void
     {
-        /*
-         * Nav: all active genders with their active category children.
-         * Cached for 60 min, busted by Category model events.
-         */
+        View::composer('components.admin.nav', function ($view) {
+            $view->with('pendingCount', Order::where('status', 'pending')->count());
+        });
+
+        View::composer('components.layout.layout', function ($view) {
+            $query = CartItem::query();
+
+            $cartItems = auth()->check()
+            ? $query->forUser(auth()->id())->with('variant.product.images')->get()
+            : $query->forSession(session()->getId())->with('variant.product.images')->get();
+
+            $cartTotal = $cartItems->sum->line_total;
+
+            $view->with(compact('cartItems', 'cartTotal'));
+        });
+
         View::composer('components.layout.nav', function ($view) {
-            // $genders = cache()->remember('nav_genders', now()->addMinutes(60), function () {
-            //     return Category::genders()
-            //         ->active()
-            //         ->with('children')
-            //         ->get();
-            // });
+
             $genders = Category::genders()
                 ->active()
-                ->with('children.children')
+                ->with([
+                    'children' => function ($query) {
+                        $query->active()->with([
+                            'children' => function ($subQuery) {
+                                $subQuery->active();
+                            },
+                        ]);
+                    },
+                ])
                 ->get();
 
             $view->with('navGenders', $genders);

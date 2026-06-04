@@ -9,6 +9,11 @@ class ProductController extends Controller
 {
     public function home()
     {
+        if (auth()->check() && ! auth()->user()->hasVerifiedEmail()) {
+
+            return redirect()->route('verification.notice');
+        }
+
         $genders = Category::genders()->active()->orderBy('sort_order')->get();
 
         return view('welcome', compact('genders'));
@@ -20,9 +25,11 @@ class ProductController extends Controller
         $categories = $gender->children()->with('children')->get();
 
         // All products sitting under this gender
-        $products = Product::with(['variants', 'images'])
-            ->whereHas('category.parent.parent', fn ($q) => $q->where('id', $gender->id)
-            )->with('category.parent.parent')
+        $products = Product::with(['variants', 'images', 'primaryImage'])
+            ->isActive()
+            ->whereHas('category.parent.parent', fn ($q) => $q->where('id', $gender->id))
+            ->with('category.parent.parent')
+            ->latest()
             ->get();
 
         return view('product.gender.index', compact('gender', 'categories', 'products'));
@@ -32,9 +39,11 @@ class ProductController extends Controller
     {
         $subcategories = $category->children()->get();
 
-        $products = Product::with(['variants.color', 'variants.size', 'images'])
-            ->whereHas('category', fn ($q) => $q->where('parent_id', $category->id)
-            )->get();
+        $products = Product::with(['variants.color', 'variants.size', 'images', 'primaryImage'])
+            ->isActive()
+            ->whereHas('category', fn ($q) => $q->where('parent_id', $category->id))
+            ->latest()
+            ->get();
 
         return view('product.category.show', compact('gender', 'category', 'subcategories', 'products'));
 
@@ -42,18 +51,12 @@ class ProductController extends Controller
 
     public function subcategoryShow(Category $gender, Category $category, Category $subcategory)
     {
-        // if (
-        //     $category->parent?->slug !== $gender->slug ||
-        //     $subcategory->parent?->id !== $category->id ||
-        //     $subcategory->parent?->parent?->slug !== $gender->slug
-        // ) {
-        //     abort(404);
-        // }
-
         $subcategories = $category->children()->get();
 
-        $products = Product::with(['variants.color', 'variants.size', 'images'])
+        $products = Product::with(['variants.color', 'variants.size', 'images', 'primaryImage'])
+            ->isActive()
             ->where('category_id', $subcategory->id)
+            ->latest()
             ->paginate(16);
 
         return view('product.subcategory.show', compact('gender', 'category', 'products', 'subcategory', 'subcategories'));

@@ -15,12 +15,14 @@ return new class extends Migration
     {
         Schema::create('order_product_variant', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete(); // ->cascadeOnDelete()
-            $table->foreignIdFor(ProductVariant::class)->constrained()->cascadeOnDelete(); // ->cascadeOnDelete()
-            $table->integer('quantity')->default(0);
+            $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(ProductVariant::class)->constrained()->cascadeOnDelete();
+            $table->unsignedInteger('quantity')->default(1);
             $table->decimal('unit_price');
             $table->decimal('subtotal', 10, 2);
             $table->timestamps();
+
+            $table->unique(['order_id', 'product_variant_id']);
         });
     }
 

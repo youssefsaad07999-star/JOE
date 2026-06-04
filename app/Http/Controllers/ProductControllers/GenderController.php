@@ -5,6 +5,7 @@ namespace App\Http\Controllers\ProductControllers;
 use App\Http\Controllers\Controller;
 use App\Models\ProductModels\Category;
 use App\Models\ProductModels\Product;
+use App\Models\ShopSetting;
 
 class GenderController extends Controller
 {
@@ -13,7 +14,9 @@ class GenderController extends Controller
         $genders = Category::where('parent_id', null)
             ->get();
 
-        return view('welcome', compact('genders'));
+        $free_shipping_threshold = ShopSetting::get('free_shipping_threshold');
+
+        return view('welcome', compact('genders', 'free_shipping_threshold'));
     }
 
     public function show(string $gender)

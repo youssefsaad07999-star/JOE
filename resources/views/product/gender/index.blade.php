@@ -12,8 +12,11 @@
 
         {{-- Category Grid --}}
         <div class="flex gap-6 overflow-x-auto py-4 border-t border-gray-200">
-            @foreach($categories as $category)
-                <a href="{{ route('gender.category.show', ['gender' => $gender->slug, 'category' => $category->slug]) }}"
+            @foreach ($categories as $category)
+                <a href="{{ route('gender.category.show', [
+                    'gender' => $gender->slug,
+                    'category' => $category->slug,
+                ]) }}"
                     class="group text-sm font-light tracking-wide text-gray-700 hover:text-[#C85C6E] transition-colors flex items-center gap-1">
                     {{ $category->name }}
                     <svg class="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" fill="none"
@@ -31,8 +34,7 @@
 
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                 @forelse($products as $product)
-                    <x-product-card :product="$product" :gender="$gender" :category="$product->category->parent"
-                        :subcategory="$product->category" />
+                    <x-product-card :product="$product" :gender="$gender" :category="$product->category->parent" :subcategory="$product->category" />
                 @empty
                     <div class="col-span-full text-center py-20">
                         <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor"
@@ -45,7 +47,7 @@
                 @endforelse
             </div>
 
-            @if(isset($products) && method_exists($products, 'links'))
+            @if (isset($products) && method_exists($products, 'links'))
                 <div class="mt-10">{{ $products->links() }}</div>
             @endif
         </div>

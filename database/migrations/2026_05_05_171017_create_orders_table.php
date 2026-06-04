@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignIdfor(User::class)->constrained()->cascadeOnDelete();
-            $table->foreignIdfor(Address::class)->constrained();
+            $table->foreignIdfor(Address::class)->nullable()->constrained()->nullOnDelete();
             $table->float('total_price');
             $table->timestamps();
 

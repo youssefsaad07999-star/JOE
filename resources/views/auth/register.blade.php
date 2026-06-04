@@ -12,7 +12,7 @@
                     Join thousands of fashion lovers.<br>Create your free account today.
                 </p>
                 <div class="flex justify-center gap-8 mt-10">
-                    @foreach(['Free Returns', 'Style Tips', 'Early Access'] as $perk)
+                    @foreach (['Free Returns', 'Style Tips', 'Early Access'] as $perk)
                         <div class="text-center">
                             <div
                                 class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center mx-auto mb-2">
@@ -36,17 +36,24 @@
                     <h1 class="font-['Cormorant_Garamond'] text-4xl font-light">Create Account</h1>
                 </div>
 
-                <form action="/register" method="POST" class="space-y-4">
+                <form action="{{ route('register') }}" method="POST" class="space-y-4">
                     @csrf
 
-                    {{-- name → users.name --}}
-                    <x-form.field name="name" title="Full Name" placeholder="John Doe" />
+                    {{-- Name fields structured cleanly with a responsive grid --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <x-form.field name="first_name" title="First Name" placeholder="John" />
+                        <x-form.field name="last_name" title="Last Name" placeholder="Doe" />
+                    </div>
+
+                    {{-- Rest of your form inputs go here... --}}
+
 
                     {{-- date_of_birth → users.date_of_birth (date column) --}}
                     <x-form.field name="date_of_birth" title="Date of Birth" type="date" placeholder="" />
 
                     {{-- phone_number → users.phone_number --}}
-                    <x-form.field name="phone_number" title="Phone Number" type="tel" placeholder="+20 10 1234 5678" />
+                    <x-form.field name="phone_number" title="Phone Number" type="tel"
+                        placeholder="+20 10 1234 5678" />
 
                     {{-- email → users.email --}}
                     <x-form.field name="email" title="Email Address" type="email" placeholder="you@example.com" />
@@ -58,36 +65,39 @@
 
                         {{-- Strength bar — driven by Alpine watching the input --}}
                         <div class="mt-2" x-data="{
-                                strength: 0,
-                                check(val) {
-                                    let s = 0;
-                                    if (val.length >= 8)           s++;
-                                    if (/[A-Z]/.test(val))         s++;
-                                    if (/[0-9]/.test(val))         s++;
-                                    if (/[^A-Za-z0-9]/.test(val)) s++;
-                                    this.strength = s;
-                                }
-                            }">
+                            strength: 0,
+                            check(val) {
+                                let s = 0;
+                                if (val.length >= 8) s++;
+                                if (/[A-Z]/.test(val)) s++;
+                                if (/[0-9]/.test(val)) s++;
+                                if (/[^A-Za-z0-9]/.test(val)) s++;
+                                this.strength = s;
+                            }
+                        }">
                             <div class="flex gap-1.5"
                                 x-on:input.window="check($event.target.name === 'password' ? $event.target.value : '')">
-                                @for($i = 1; $i <= 4; $i++)
-                                    <div class="h-1 flex-1 rounded-full transition-colors duration-300" :class="{
-                                                                 'bg-red-400':    strength >= {{ $i }} && strength === 1,
-                                                                 'bg-amber-400':  strength >= {{ $i }} && strength === 2,
-                                                                 'bg-yellow-400': strength >= {{ $i }} && strength === 3,
-                                                                 'bg-emerald-400':strength >= {{ $i }} && strength === 4,
-                                                                 'bg-gray-200':   strength < {{ $i }}
-                                                             }">
+                                @for ($i = 1; $i <= 4; $i++)
+                                    <div class="h-1 flex-1 rounded-full transition-colors duration-300"
+                                        :class="{
+                                            'bg-red-400': strength >= {{ $i }} && strength === 1,
+                                            'bg-amber-400': strength >= {{ $i }} && strength === 2,
+                                            'bg-yellow-400': strength >= {{ $i }} && strength === 3,
+                                            'bg-emerald-400': strength >= {{ $i }} && strength === 4,
+                                            'bg-gray-200': strength < {{ $i }}
+                                        }">
                                     </div>
                                 @endfor
                             </div>
-                            <p class="text-xs mt-1 transition-colors" :class="{
-                                   'text-red-400':     strength === 1,
-                                   'text-amber-400':   strength === 2,
-                                   'text-yellow-500':  strength === 3,
-                                   'text-emerald-500': strength === 4,
-                                   'text-transparent': strength === 0
-                               }" x-text="['','Weak','Fair','Good','Strong'][strength]">
+                            <p class="text-xs mt-1 transition-colors"
+                                :class="{
+                                    'text-red-400': strength === 1,
+                                    'text-amber-400': strength === 2,
+                                    'text-yellow-500': strength === 3,
+                                    'text-emerald-500': strength === 4,
+                                    'text-transparent': strength === 0
+                                }"
+                                x-text="['','Weak','Fair','Good','Strong'][strength]">
                             </p>
                         </div>
                     </div>
@@ -107,7 +117,8 @@
                     </label>
                     <x-form.error name="terms" />
 
-                    <button type="submit" class="w-full bg-[#1C1C1C] text-white py-4 rounded-full font-medium
+                    <button type="submit"
+                        class="w-full bg-[#1C1C1C] text-white py-4 rounded-full font-medium
                                hover:bg-[#C85C6E] transition-colors duration-300 text-sm tracking-wide mt-2">
                         Create Account
                     </button>

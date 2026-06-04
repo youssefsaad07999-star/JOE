@@ -1,92 +1,239 @@
 <x-layout>
-    <div class="max-w-4xl mx-auto px-6 py-10">
+    <div class="max-w-5xl mx-auto px-6 py-12">
 
-        <div class="mb-10">
-            <p class="text-[#C85C6E] text-xs font-semibold tracking-[0.3em] uppercase mb-2">Account</p>
-            <h1 class="font-['Cormorant_Garamond'] text-5xl font-light">My Orders</h1>
-        </div>
+        {{-- Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+            <div class="flex items-center gap-4">
+                <a href="{{ route('orders.index') }}"
+                    class="w-9 h-9 border border-gray-200 rounded-full flex items-center justify-center
+                      hover:border-[#C85C6E] hover:text-[#C85C6E] transition-colors flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </a>
+                <div>
+                    <p class="text-[#C85C6E] text-xs font-semibold tracking-[0.25em] uppercase mb-0.5">
+                        Order #{{ $order->id }}
+                    </p>
+                    <h1 class="font-['Cormorant_Garamond'] text-3xl font-light">
+                        {{ $order->created_at->format('F d, Y') }}
+                    </h1>
+                </div>
+            </div>
 
-        @forelse($orders as $order)
-                <div class="bg-white rounded-2xl shadow-sm mb-4 overflow-hidden">
-
-                    {{-- Order Header --}}
-                    <div
-                        class="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-4 bg-gray-50 border-b border-gray-100 gap-3">
-                        <div class="flex flex-wrap gap-6">
-                            <div>
-                                <p class="text-xs text-gray-400 mb-0.5">Order</p>
-                                <p class="text-sm font-semibold">#{{ $order->id }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 mb-0.5">Date</p>
-                                <p class="text-sm">{{ $order->created_at->format('M d, Y') }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 mb-0.5">Total</p>
-                                <p class="text-sm font-semibold">${{ number_format($order->total, 2) }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 mb-0.5">Status</p>
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                {{ match ($order->status) {
+            {{-- Status badge --}}
+            <span
+                class="self-start sm:self-center px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase
+            {{ match ($order->status) {
                 'delivered' => 'bg-emerald-100 text-emerald-700',
                 'shipped' => 'bg-blue-100 text-blue-700',
                 'processing' => 'bg-amber-100 text-amber-700',
                 'cancelled' => 'bg-red-100 text-red-700',
                 default => 'bg-gray-100 text-gray-600',
             } }}">
-                                    {{ ucfirst($order->status ?? 'pending') }}
-                                </span>
-                            </div>
-                        </div>
-                        {{-- {{ route('orders.show', $order) }} --}}
-                        <a href="" class="text-sm text-[#C85C6E] hover:underline font-medium whitespace-nowrap">
-                            View Details →
-                        </a>
-                    </div>
+                {{ ucfirst($order->status) }}
+            </span>
+        </div>
 
-                    {{-- Order Items Preview --}}
-                    <div class="px-6 py-4 flex gap-3">
-                        @foreach($order->items->take(4) as $item)
-                            <div class="w-14 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                                @if($item->product->image)
-                                    <img src="{{ asset('storage/' . $item->product->image) }}" class="w-full h-full object-cover">
+        {{-- Status Timeline --}}
+        @if ($order->status !== 'cancelled')
+            <div class="bg-white rounded-2xl p-8 shadow-sm mb-6">
+                @php
+                    $statuses = ['pending', 'processing', 'shipped', 'delivered'];
+                    $labels = ['Ordered', 'Processing', 'Shipped', 'Delivered'];
+                    $currentIdx = array_search($order->status, $statuses) ?: 0;
+                @endphp
+
+                <div class="flex items-center">
+                    @foreach ($statuses as $idx => $status)
+                        {{-- Step --}}
+                        <div class="flex flex-col items-center flex-shrink-0">
+                            <div
+                                class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all
+                                {{ $idx <= $currentIdx ? 'bg-[#C85C6E] border-[#C85C6E]' : 'bg-white border-gray-200' }}">
+                                @if ($idx <= $currentIdx)
+                                    <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                            clip-rule="evenodd" />
+                                    </svg>
                                 @else
-                                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                        </svg>
-                                    </div>
+                                    <div class="w-2 h-2 rounded-full bg-gray-200"></div>
                                 @endif
                             </div>
-                        @endforeach
-                        @if($order->items->count() > 4)
-                            <div class="w-14 h-16 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                <span class="text-xs text-gray-500 font-medium">+{{ $order->items->count() - 4 }}</span>
+                            <span
+                                class="mt-2 text-xs whitespace-nowrap
+                                 {{ $idx <= $currentIdx ? 'text-[#1C1C1C] font-medium' : 'text-gray-400' }}">
+                                {{ $labels[$idx] }}
+                            </span>
+                        </div>
+
+                        {{-- Connector --}}
+                        @if (!$loop->last)
+                            <div
+                                class="flex-1 h-0.5 mx-2 mb-5
+                                {{ $idx < $currentIdx ? 'bg-[#C85C6E]' : 'bg-gray-100' }}">
                             </div>
                         @endif
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        <div class="grid lg:grid-cols-3 gap-6">
+
+            {{-- Items --}}
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                        <h2 class="font-['Cormorant_Garamond'] text-xl font-semibold">Items Ordered</h2>
+                        <span class="text-xs text-gray-400">
+                            {{ $order->variants->count() }} {{ Str::plural('item', $order->variants->count()) }}
+                        </span>
+                    </div>
+
+                    <div class="divide-y divide-gray-100">
+                        @foreach ($order->variants as $variant)
+                            @php
+                                $img = $variant->product->images->where('color_id', $variant->color_id)->first();
+
+                            @endphp
+                            <div class="flex gap-4 p-5">
+
+                                {{-- Image --}}
+                                <div class="w-20 h-24 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                                    @if ($img)
+                                        <img src="{{ asset('storage/' . $img->image_path) }}"
+                                            class="w-full h-full object-cover" alt="{{ $variant->product->name }}">
+                                    @else
+                                        <div
+                                            class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200
+                                                flex items-center justify-center">
+                                            <svg class="w-7 h-7 text-gray-300" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Details --}}
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-medium text-sm text-[#1C1C1C]">
+                                        {{ $variant->product->name }}
+                                    </h3>
+                                    <p class="text-gray-400 text-xs mt-1">
+                                        @if ($variant->size)
+                                            Size: {{ $variant->size->name }}
+                                        @endif
+                                        @if ($variant->color)
+                                            · Color: {{ ucfirst($variant->color->name) }}
+                                        @endif
+                                    </p>
+                                    <p class="text-gray-300 text-xs mt-0.5 font-mono">
+                                        {{ $variant->sku }}
+                                    </p>
+
+                                    <div class="flex items-center justify-between mt-3">
+                                        <span class="text-xs text-gray-500 bg-gray-50 px-2.5 py-1 rounded-full">
+                                            Qty {{ $variant->pivot->quantity }}
+                                        </span>
+                                        <div class="text-right">
+                                            <p class="font-semibold text-sm">
+                                                ${{ number_format($variant->pivot->subtotal, 2) }}
+                                            </p>
+                                            <p class="text-xs text-gray-400">
+                                                ${{ number_format($variant->pivot->unit_price, 2) }} each
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-        @empty
-            <div class="text-center py-24">
-                <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
-                    <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                </div>
-                <h2 class="font-['Cormorant_Garamond'] text-3xl font-light text-gray-500 mb-3">No orders yet</h2>
-                <p class="text-gray-400 text-sm font-light mb-8">Your orders will appear here once you make a purchase.</p>
-                <a href="/"
-                    class="inline-block bg-[#1C1C1C] text-white px-8 py-3.5 rounded-full text-sm hover:bg-[#C85C6E] transition-colors">
-                    Start Shopping
-                </a>
             </div>
-        @endforelse
 
-        @if(method_exists($orders, 'links'))
-            <div class="mt-6">{{ $orders->links() }}</div>
-        @endif
+            {{-- Sidebar --}}
+            <div class="space-y-4">
+
+                {{-- Order Summary --}}
+                <div class="bg-white rounded-2xl p-5 shadow-sm">
+                    <h3 class="font-['Cormorant_Garamond'] text-lg font-semibold mb-4">Summary</h3>
+                    <div class="space-y-2.5 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Subtotal</span>
+                            {{-- Subtotal = total_price - shipping_cost --}}
+                            <span>${{ number_format($order->total_price - $order->shipping_cost, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Shipping</span>
+                            <span class="{{ $order->shipping_cost == 0 ? 'text-emerald-600 font-medium' : '' }}">
+                                {{ $order->shipping_cost > 0 ? '$' . number_format($order->shipping_cost, 2) : 'Free' }}
+                            </span>
+                        </div>
+                        @if ($order->shipping_method_name)
+                            <p class="text-xs text-gray-400 -mt-1">{{ $order->shipping_method_name }}</p>
+                        @endif
+                    </div>
+                    <div class="border-t border-gray-100 mt-4 pt-4 flex justify-between font-semibold">
+                        <span>Total</span>
+                        <span class="text-base">${{ number_format($order->total_price, 2) }}</span>
+                    </div>
+                </div>
+
+                {{-- Shipping Address --}}
+                <div class="bg-white rounded-2xl p-5 shadow-sm">
+                    <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z
+                                 M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Shipping Address
+                    </h3>
+                    <p class="text-sm text-gray-600 font-light leading-relaxed">
+                        {{ $order->shipping_first_name }} {{ $order->shipping_last_name }}<br>
+                        {{ $order->shipping_address }}
+                        @if ($order->shipping_address2)
+                            , {{ $order->shipping_address2 }}
+                        @endif
+                        <br>
+                        {{ $order->shipping_city }}, {{ $order->shipping_postal_code }}<br>
+                        {{ $order->shipping_country }}
+                    </p>
+                    @if ($order->shipping_phone)
+                        <p class="text-xs text-gray-400 mt-2">{{ $order->shipping_phone }}</p>
+                    @endif
+                </div>
+
+                {{-- Payment --}}
+                <div class="bg-white rounded-2xl p-5 shadow-sm">
+                    <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        Payment
+                    </h3>
+                    <p class="text-sm text-gray-600 font-light capitalize">
+                        {{ str_replace('_', ' ', $order->payment?->method ?? 'Cash on delivery') }}
+                    </p>
+                    @if ($order->payment)
+                        <span
+                            class="inline-flex items-center gap-1 mt-2 text-xs px-2.5 py-1 rounded-full
+                        {{ $order->payment->status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                            <span
+                                class="w-1.5 h-1.5 rounded-full
+                            {{ $order->payment->status === 'completed' ? 'bg-emerald-500' : 'bg-amber-500' }}">
+                            </span>
+                            {{ ucfirst($order->payment->status ?? 'pending') }}
+                        </span>
+                    @endif
+                </div>
+
+            </div>
+        </div>
     </div>
 </x-layout>

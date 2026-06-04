@@ -24,7 +24,9 @@ class SessionsController extends Controller
 
         session(['guest_session_id' => $oldSessionId]);
 
-        if (! Auth::attempt($attributes)) {
+        $remember = $request->has('remember');
+
+        if (! Auth::attempt($attributes, $remember)) {
             return back()->withErrors([
                 'password' => 'Invalid credentials',
             ]

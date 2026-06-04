@@ -6,10 +6,12 @@ use App\Models\ProductModels\ProductVariant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
+    protected $guarded;
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -17,7 +19,11 @@ class Order extends Model
 
     public function variants(): BelongsToMany
     {
-        return $this->belongsToMany(ProductVariant::class)
+        return $this->belongsToMany(ProductVariant::class,
+            'order_product_variant',
+            'order_id',
+            'product_variant_id'
+        )
             ->withPivot('quantity', 'unit_price', 'subtotal')
             ->withTimestamps();
 
@@ -28,8 +34,8 @@ class Order extends Model
         return $this->belongsTo(Address::class);
     }
 
-    public function payments(): HasMany
+    public function payment(): HasOne
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasOne(Payment::class);
     }
 }

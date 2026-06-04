@@ -3,6 +3,7 @@
 namespace App\Models\ProductModels;
 
 use App\Models\Order;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ class ProductVariant extends Model
 {
     use HasFactory;
 
-    protected $gaurded;
+    protected $guarded;
 
     public function product(): BelongsTo
     {
@@ -44,5 +45,10 @@ class ProductVariant extends Model
     public function cart_items(): HasMany
     {
         return $this->hasMany(CartItem::class);
+    }
+
+    public function scopeIsActive(Builder $q)
+    {
+        return $q->where('is_active', true);
     }
 }

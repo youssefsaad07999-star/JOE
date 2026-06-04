@@ -31,6 +31,7 @@
                         </svg>
                     </a>
                 </div>
+
             </div>
 
             {{-- Shop --}}
@@ -43,9 +44,11 @@
                     <li><a href="{{ route('gender.index', ['gender' => 'women']) }}"
                             class="text-sm font-light text-gray-300 hover:text-white transition-colors">Women's
                             Collection</a></li>
-                    <li><a href="#" class="text-sm font-light text-gray-300 hover:text-white transition-colors">New
+                    <li><a href="#"
+                            class="text-sm font-light text-gray-300 hover:text-white transition-colors">New
                             Arrivals</a></li>
-                    <li><a href="#" class="text-sm font-light text-gray-300 hover:text-white transition-colors">Sale</a>
+                    <li><a href="#"
+                            class="text-sm font-light text-gray-300 hover:text-white transition-colors">Sale</a>
                     </li>
                 </ul>
             </div>
@@ -57,11 +60,14 @@
                     <li><a href="/contact"
                             class="text-sm font-light text-gray-300 hover:text-white transition-colors">Contact Us</a>
                     </li>
-                    <li><a href="#" class="text-sm font-light text-gray-300 hover:text-white transition-colors">Shipping
+                    <li><a href="#"
+                            class="text-sm font-light text-gray-300 hover:text-white transition-colors">Shipping
                             & Returns</a></li>
-                    <li><a href="#" class="text-sm font-light text-gray-300 hover:text-white transition-colors">Size
+                    <li><a href="#"
+                            class="text-sm font-light text-gray-300 hover:text-white transition-colors">Size
                             Guide</a></li>
-                    <li><a href="#" class="text-sm font-light text-gray-300 hover:text-white transition-colors">FAQ</a>
+                    <li><a href="#"
+                            class="text-sm font-light text-gray-300 hover:text-white transition-colors">FAQ</a>
                     </li>
                 </ul>
             </div>
@@ -89,7 +95,8 @@
             <p class="text-gray-500 text-xs font-light">© 2026 JOE Store. All rights reserved.</p>
             <div class="flex gap-6">
                 <a href="#" class="text-gray-500 text-xs hover:text-gray-300 transition-colors">Privacy Policy</a>
-                <a href="#" class="text-gray-500 text-xs hover:text-gray-300 transition-colors">Terms of Service</a>
+                <a href="#" class="text-gray-500 text-xs hover:text-gray-300 transition-colors">Terms of
+                    Service</a>
             </div>
         </div>
     </div>

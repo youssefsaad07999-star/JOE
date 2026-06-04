@@ -5,6 +5,8 @@ namespace App\Http\Controllers\ProductControllers;
 use App\Http\Controllers\Controller;
 use App\Models\ProductModels\CartItem;
 use App\Models\ProductModels\ProductVariant;
+use App\Models\ShippingMethod;
+use App\Models\ShopSetting;
 use Illuminate\Http\Request;
 
 class CartItemController extends Controller
@@ -17,7 +19,11 @@ class CartItemController extends Controller
 
         $cartTotal = $cartItems->sum->line_total;
 
-        return view('cart.index', compact('cartItems', 'cartTotal'));
+        $free_shipping_threshold = ShopSetting::get('free_shipping_threshold');
+
+        $standardShippingMethod = ShippingMethod::where('name', 'Standard Shipping')->first();
+
+        return view('cart.index', compact('cartItems', 'cartTotal', 'free_shipping_threshold', 'standardShippingMethod'));
 
     }
 
