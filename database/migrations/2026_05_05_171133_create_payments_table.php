@@ -15,9 +15,10 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->nullOnDelete();
-            $table->foreignIdFor(Order::class)->constrained()->nullOnDelete();
+            $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Order::class)->nullable()->constrained()->nullOnDelete();
             $table->string('transaction_id')->nullable();
+            $table->string('status');
             $table->decimal('amount', 10, 2);
             $table->string('method');
             $table->timestamps();

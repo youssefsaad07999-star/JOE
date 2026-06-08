@@ -1,6 +1,5 @@
 <?php
 
-// use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Admin\CategoryAdminController;
 use App\Http\Controllers\Admin\OrderAdminController;
 use App\Http\Controllers\Admin\ProductAdminController;
@@ -9,17 +8,15 @@ use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmailVerificationPromptController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductControllers\CartItemController;
 use App\Http\Controllers\RegisteredUserController;
 use App\Http\Controllers\SessionsController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Paddle\Http\Controllers\WebhookController;
-
-// Route::get('/products/{category}', [ProductController::class, 'byCategory']);
 
 Route::get('/', [ProductController::class, 'home'])->name('home');
 
@@ -35,20 +32,16 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/logout', [SessionsController::class, 'destroy'])->name('logout');
 
-    Route::get('/email/verify', function () {
-        return view('auth.verify-email');
-    })->name('verification.notice');
+    Route::get('/email/verify', EmailVerificationPromptController::class)->name('verification.notice');
 
-    Route::post('/email/verification-notification', function (Request $request) {
-        $request->user()->sendEmailVerificationNotification();
-
-        return back()->with('status', 'verification-link-sent');
-    })->middleware(['throttle:6,1'])->name('verification.send');
+    Route::post('/email/verification-notification', [
+        EmailVerificationPromptController::class, 'sendEmailVerificaitonLink',
+    ])->middleware(['throttle:6,1'])->name('verification.send');
 
     Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
         $request->fulfill(); // Changes email_verified_at from NULL to current time
 
-        return redirect('/')->with('success', 'Email verified successfully!');
+        return redirect(route('home'))->with('success', 'Email verified successfully!');
     })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
 });
 

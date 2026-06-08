@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Address;
+use App\Models\ShippingMethod;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -17,15 +18,20 @@ return new class extends Migration
             $table->id();
             $table->foreignIdfor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdfor(Address::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignIdFor(ShippingMethod::class)->nullable()->constrained()->nullOnDelete();
+            $table->string('status')->default('pending');
             $table->float('total_price');
+            $table->string('shipping_first_name')->nullable();
+            $table->string('shipping_last_name')->nullable();
+            $table->string('shipping_address')->nullable();
+            $table->string('shipping_address2')->nullable();
+            $table->string('shipping_city')->nullable();
+            $table->string('shipping_postal_code')->nullable();
+            $table->string('shipping_country')->nullable();
+            $table->string('shipping_phone')->nullable();
+            $table->string('shipping_method')->nullable();
+            $table->decimal('shipping_cost', 10, 2)->default(0);
             $table->timestamps();
-
-            // user_id as a foreign key
-            // product_id as a foreign key
-            // order_amount
-            // we need to make new table "orders_items" as orders and products got m to m relationship and will have attributes like quantity unit_price
-            //
-
         });
     }
 

@@ -24,8 +24,7 @@
                     {{ $value }}
                 </div>
             @endsession
-            {{-- {{ route('password.email') }} --}}
-            <form method="POST" action="" class="space-y-4">
+            <form method="POST" action="{{ route('password.email') }}" class="space-y-4">
                 @csrf
                 <x-form.field name="email" title="Email Address" type="email" placeholder="you@example.com" />
 

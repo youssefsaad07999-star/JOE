@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('delivery_time');       // e.g. "5–7 business days"
             $table->decimal('price', 10, 2);       // e.g. 9.99
             $table->boolean('is_active')->default(true);
+            $table->unsignedInteger('sort_order')->default(0);
             $table->timestamps();
         });
     }

@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\ProductModels\CartItem;
+use App\Notifications\OrderCreatedNotification;
 use Laravel\Paddle\Events\TransactionCompleted;
 
 class HandlePaddleTransactionCompleted
@@ -47,6 +48,9 @@ class HandlePaddleTransactionCompleted
 
         // Update order status
         $order->update(['status' => 'processing']);
+
+        $user = $order->user;
+        $user->notify(new OrderCreatedNotification($order));
 
         // Create or update the payment record
         Payment::updateOrCreate(

@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\ProductModels\CartItem;
 use App\Models\ShippingMethod;
 use App\Models\ShopSetting;
+use App\Notifications\OrderCreatedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -106,6 +107,9 @@ class CheckoutController extends Controller
                 $variant->decrement('stock_quantity', $variant->pivot->quantity);
             }
             $this->clearCart();
+
+            $user = $order->user;
+            $user->notify(new OrderCreatedNotification($order));
 
             return redirect()->route('checkout.success', $order)
                 ->with('success', 'Order placed! Pay on delivery.');

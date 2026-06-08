@@ -14,10 +14,10 @@
 
             <form method="POST" action="{{ route('password.update') }}" class="space-y-4">
                 @csrf
-                <input type="hidden" name="token" value="{{ $request->route('token') }}">
+                <input type="hidden" name="token" value="{{ request()->route('token') }}">
 
                 <x-form.field name="email" title="Email Address" type="email" placeholder="you@example.com"
-                    :value="old('email', $request->email)" />
+                    :value="old('email', request()->email)" />
 
                 <x-form.field name="password" title="New Password" type="password" placeholder="Min. 8 characters" />
 

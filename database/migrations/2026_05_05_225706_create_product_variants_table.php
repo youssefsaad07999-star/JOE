@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(Product::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Size::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Color::class)->constrained()->cascadeOnDelete();
+            $table->boolean('is_active')->default(true);
             $table->string('sku')->unique();
             $table->integer('stock_quantity')->default(0);
             $table->decimal('price_override', 10, 2)->nullable();
