@@ -1,12 +1,9 @@
 <?php
 
 use App\Models\User;
-use App\Notifications\WelcomeNotification;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\assertDatabaseHas;
 
@@ -21,8 +18,6 @@ describe('Register test', function () {
     });
 
     it('creates a user with valid data and authenticates him', function (): void {
-        // Prevent real events/mails from firing during this functional test
-        Event::fake();
 
         $registrationData = [
             'first_name' => 'Joe',
@@ -105,7 +100,8 @@ describe('Register test', function () {
     ]);
 
     it('sends an email verification notification after registration', function (): void {
-        Event::fake();
+
+        Notification::fake();
 
         $response = $this->post(route('register'), [
             'first_name' => 'Verify',
@@ -118,35 +114,17 @@ describe('Register test', function () {
             'terms' => 'on',
         ]);
 
-        // Verifies that the native Registered event is fired (which sets off email verification)
-        Event::assertDispatched(Registered::class, function (Registered $event) {
-            return $event->user->email === 'verify@elwekala.com';
-        });
+        $user = User::where('email', 'verify@elwekala.com')->first();
+
+        expect($user)->not()->toBeNull();
+
+        Notification::assertSentTo(
+            $user,
+            VerifyEmail::class
+        );
 
         $response->assertRedirect(route('verification.notice'));
 
-    });
-
-    it('sends a welcome notification after verifying the email', function (): void {
-
-        Notification::fake();
-
-        // Arrange: Create a user who is currently unverified
-        /** @var User $unverifiedUser */
-        $unverifiedUser = User::factory()->unverified()->create();
-
-        // Generate Laravel's official temporary encrypted signed URL
-        $verificationUrl = URL::temporarySignedRoute(
-            'verification.verify',
-            now()->addMinutes(60),
-            ['id' => $unverifiedUser->id, 'hash' => sha1($unverifiedUser->email)]
-        );
-
-        // Act: Simulate the user clicking the verification link in their email inbox
-        $this->actingAs($unverifiedUser)->get($verificationUrl);
-
-        // Assert: Check that the welcome notification was successfully dispatched to them
-        Notification::assertSentTo([$unverifiedUser], WelcomeNotification::class);
     });
 
 });

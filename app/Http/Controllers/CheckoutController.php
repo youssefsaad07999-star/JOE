@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InsufficientStockException;
 use App\Models\Country;
 use App\Models\Order;
 use App\Models\ProductModels\CartItem;
+use App\Models\ProductModels\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\ShopSetting;
 use App\Notifications\OrderCreatedNotification;
@@ -21,6 +23,10 @@ class CheckoutController extends Controller
         $cartItems = CartItem::forUser(Auth::id())
             ->with(['variant.product.images'])
             ->get();
+
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
+        }
 
         foreach ($cartItems as $cartItem) {
             $cartTotal += $cartItem->line_total;
@@ -41,6 +47,12 @@ class CheckoutController extends Controller
         ));
     }
 
+    // foreach ($cartItems as $item) {
+    //             if ($item->quantity > $item->variant->stock_quantity) {
+    //                 $item->delete(); // Remove the out-of-stock item from cart
+    //                 return redirect()->route('cart.index')->with('error', "The item '{$item->variant->product->name}' is out of stock or does not have enough quantity.");
+    //             }
+    //         }
     public function store(Request $request)
     {
 
@@ -52,6 +64,7 @@ class CheckoutController extends Controller
             'address' => 'required|string|max:255',
             'address2' => 'nullable|string|max:255',
             'city' => 'required|string|max:100',
+            'country' => 'required|string|max:100',
             'postal_code' => 'required|string|max:20',
             'shipping_method' => 'required|exists:shipping_methods,id',
             'payment_method' => 'required|in:card,cod',
@@ -68,48 +81,98 @@ class CheckoutController extends Controller
         $shippingCost = $this->shippingCost($subtotal, $shippingMethod);
         $total = $subtotal + $shippingCost;
 
-        // Create the local order inside a transaction
-        $order = DB::transaction(function () use ($data, $cartItems, $shippingMethod, $shippingCost, $total) {
-            $order = Order::create([
-                'user_id' => Auth::id(),
-                'address_id' => Auth::user()->addresses()->where('is_default', true)->value('id'),
-                'shipping_method_id' => $shippingMethod->id,
-                'total_price' => $total,
-                'status' => 'pending',
-                'shipping_first_name' => $data['first_name'],
-                'shipping_last_name' => $data['last_name'],
-                'shipping_address' => $data['address'],
-                'shipping_address2' => $data['address2'] ?? null,
-                'shipping_city' => $data['city'],
-                'shipping_postal_code' => $data['postal_code'],
-                'shipping_phone' => $data['phone'],
-                'shipping_method' => $shippingMethod->name,
-                'shipping_cost' => $shippingCost,
-            ]);
+        try {
+            $cartItemIdToRemove = null;
+            // Create the local order inside a transaction
+            $order = DB::transaction(function () use ($data, $cartItems, $shippingMethod, $shippingCost, $total, &$cartItemIdToRemove) {
+                $validatedVariants = [];
 
-            foreach ($cartItems as $item) {
-                $order->variants()->attach($item->product_variant_id, [
-                    'quantity' => $item->quantity,
-                    'unit_price' => $item->unit_price,
-                    'subtotal' => $item->unit_price * $item->quantity,
+                foreach ($cartItems as $item) {
+                    $variant = ProductVariant::lockForUpdate()
+                        ->where('is_active', true)
+                        ->where('id', $item->product_variant_id)
+                        ->first();
+
+                    $message = match (true) {
+                        ! $variant => 'A product in your cart is no longer available.',
+                        $variant->stock_quantity === 0 => "{$variant->product->name} is out of stock.",
+                        $variant->stock_quantity < $item->quantity => "{$variant->product->name} — only {$variant->stock_quantity} available.",
+                        default => null,
+                    };
+
+                    if ($message) {
+                        if ($variant && $variant->stock_quantity === 0) {
+                            $cartItemIdToRemove = $item->id;
+                        }
+                        throw new InsufficientStockException($message);
+                    }
+
+                    // Cache the locked variant for step 2
+                    $validatedVariants[$item->id] = $variant;
+                }
+
+                $order = Order::create([
+                    'user_id' => Auth::id(),
+                    'address_id' => Auth::user()->addresses()->where('is_default', true)->value('id'),
+                    'shipping_method_id' => $shippingMethod->id,
+                    'total_price' => $total,
+                    'status' => $data['payment_method'] === 'cod' ? 'processing' : 'pending',
+                    'shipping_first_name' => $data['first_name'],
+                    'shipping_last_name' => $data['last_name'],
+                    'shipping_address' => $data['address'],
+                    'shipping_address2' => $data['address2'] ?? null,
+                    'shipping_city' => $data['city'],
+                    'shipping_country' => $data['country'],
+                    'shipping_postal_code' => $data['postal_code'],
+                    'shipping_phone' => $data['phone'],
+                    'shipping_method' => $shippingMethod->name,
+                    'shipping_cost' => $shippingCost,
                 ]);
 
-            }
+                foreach ($cartItems as $item) {
+                    $order->variants()->attach($item->product_variant_id, [
+                        'quantity' => $item->quantity,
+                        'unit_price' => $item->unit_price,
+                        'subtotal' => $item->unit_price * $item->quantity,
+                    ]);
 
-            return $order;
-        });
+                    if ($data['payment_method'] === 'cod') {
+                        $variant = $validatedVariants[$item->id];
+                        $newStock = $variant->stock_quantity - $item->quantity;
+
+                        $variant->update([
+                            'stock_quantity' => max(0, $newStock),
+                        ]);
+                    }
+                }
+
+                return $order;
+            });
+        } catch (InsufficientStockException $e) {
+            if ($cartItemIdToRemove) {
+                CartItem::destroy($cartItemIdToRemove);
+            }
+            // dd($cartItemIdToRemove);
+
+            return redirect()->route('cart.index')->with('error', $e->getMessage());
+        }
 
         // ── Cash on Delivery — no payment gateway ─────────────────────────
         if ($data['payment_method'] === 'cod') {
-            $order->update(['status' => 'processing']);
 
-            foreach ($order->variants as $variant) {
-                $variant->decrement('stock_quantity', $variant->pivot->quantity);
-            }
             $this->clearCart();
+            $order->update(['status' => 'processing']);
 
             $user = $order->user;
             $user->notify(new OrderCreatedNotification($order));
+
+            $order->payment()->create([
+                'user_id' => $order->user_id,
+                'amount' => $total,
+                'method' => $data['payment_method'] === 'cod' ? 'cash on delivery' : 'card',
+                'status' => 'pending',
+                'transaction_id' => null,
+            ]);
 
             return redirect()->route('checkout.success', $order)
                 ->with('success', 'Order placed! Pay on delivery.');
@@ -143,9 +206,8 @@ class CheckoutController extends Controller
 
         abort_if($order->user_id !== Auth::id(), 403);
 
-        // Clear cart on success page load (safe fallback if webhook fires late)
-        // $this->clearCart();
-
+        // we don't need to clear the cart here
+        // already cleared in the webhook listener after successful payment
         $order->load(['variants.product', 'variants.size', 'variants.color']);
 
         return view('checkout.success', compact('order'));

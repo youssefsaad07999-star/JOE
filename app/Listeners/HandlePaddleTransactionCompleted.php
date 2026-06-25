@@ -43,7 +43,10 @@ class HandlePaddleTransactionCompleted
         }
 
         foreach ($order->variants as $variant) {
-            $variant->decrement('stock_quantity', $variant->pivot->quantity);
+            $newStock = $variant->stock_quantity - $variant->pivot->quantity;
+            $variant->update([
+                'stock_quantity' => max(0, $newStock),
+            ]);
         }
 
         // Update order status

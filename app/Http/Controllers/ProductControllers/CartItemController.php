@@ -8,6 +8,7 @@ use App\Models\ProductModels\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\ShopSetting;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class CartItemController extends Controller
 {
@@ -31,7 +32,7 @@ class CartItemController extends Controller
     {
 
         $data = $request->validate([
-            'product_variant_id' => 'required|exists:product_variants,id',
+            'product_variant_id' => 'required',
             'quantity' => 'required|integer|min:1|max:50',
         ]);
 
@@ -45,7 +46,9 @@ class CartItemController extends Controller
         $newQty = ($existing?->quantity ?? 0) + $data['quantity'];
 
         if ($newQty > $variant->stock_quantity) {
-            return back()->with('error', "Only {$variant->stock_quantity} in stock.");
+            throw ValidationException::withMessages([
+                'quantity' => "Only {$variant->stock_quantity} units are available in stock.",
+            ]);
         }
 
         $this->currentCart()->updateOrCreate(
@@ -64,15 +67,17 @@ class CartItemController extends Controller
 
     public function update(Request $request, CartItem $cartItem)
     {
-        // dd($cartItem);
+
         $this->authorizeItem($cartItem);
 
         $data = $request->validate([
-            'quantity' => 'required|integer|min:1|max:50',
+            'quantity' => 'required|integer|min:1',
         ]);
 
         if ($cartItem->variant->stock_quantity < $data['quantity']) {
-            return back()->with('error', "Only {$cartItem->variant->stock_quantity} available.");
+            throw ValidationException::withMessages([
+                'quantity' => "Only {$cartItem->variant->stock_quantity} units are available in stock.",
+            ]);
         }
 
         $cartItem->update([

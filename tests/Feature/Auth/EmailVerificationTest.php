@@ -113,4 +113,26 @@ describe('EmailVerification Test', function () {
         );
     });
 
+    it('sends a welcome notification after verifying the email', function (): void {
+
+        Notification::fake();
+
+        // Arrange: Create a user who is currently unverified
+        /** @var User $unverifiedUser */
+        $unverifiedUser = User::factory()->unverified()->create();
+
+        // Generate Laravel's official temporary encrypted signed URL
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['id' => $unverifiedUser->id, 'hash' => sha1($unverifiedUser->email)]
+        );
+
+        // Act: Simulate the user clicking the verification link in their email inbox
+        $this->actingAs($unverifiedUser)->get($verificationUrl);
+
+        // Assert: Check that the welcome notification was successfully dispatched to them
+        Notification::assertSentTo([$unverifiedUser], WelcomeNotification::class);
+    });
+
 });

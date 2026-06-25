@@ -26,10 +26,11 @@ class PasswordResetController extends Controller
             $request->only('email')
         );
 
-        // If successful, redirect back with a status message
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with('status', __($status))
-            : back()->withErrors(['email' => __($status)]);
+        if ($status === Password::RESET_THROTTLED) {
+            return back()->withErrors(['email' => __($status)]);
+        }
+
+        return back()->with('status', __(Password::RESET_LINK_SENT));
     }
 
     public function edit($token)

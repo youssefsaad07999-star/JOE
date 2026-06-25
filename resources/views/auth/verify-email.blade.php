@@ -8,7 +8,8 @@
                 </p>
                 <h1 class="font-['Cormorant_Garamond'] text-4xl font-light">Verify Your Email</h1>
                 <p class="text-gray-500 text-sm mt-3 font-light leading-relaxed">
-                    First you need to verify your email!, could you verify your email address by clicking the
+                    First you need to verify your email to have updates!, could you verify your email address by
+                    clicking the
                     link we just emailed to you?
                 </p>
             </div>

@@ -26,6 +26,7 @@ class ProductFactory extends Factory
             'category_id' => Category::doesntHave('children')->inRandomOrder()->first()->id,
             'fit_id' => Fit::inRandomOrder()->first()->id,
             'base_price' => $this->faker->randomFloat(2, 200, 1000),
+            'is_active' => true,
         ];
     }
 }

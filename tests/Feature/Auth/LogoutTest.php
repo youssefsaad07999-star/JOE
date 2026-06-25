@@ -28,7 +28,7 @@ describe('Logout Test', function () {
 
     });
 
-    it('guests cannot access logout route', function (): void {
+    it('prevents guests from accessing logout route', function (): void {
         $response = $this->post(route('logout'));
 
         $response->assertRedirect(route('login'));

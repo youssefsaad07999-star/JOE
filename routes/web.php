@@ -41,15 +41,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
         $request->fulfill(); // Changes email_verified_at from NULL to current time
 
-        return redirect(route('home'))->with('success', 'Email verified successfully!');
-    })->middleware(['signed', 'throttle:6,1'])->name('verification.verify');
-});
-
-Route::middleware(['auth', 'verified'])->group(function () {
+        return redirect()->intended(route('home'))->with('success', 'Email verified successfully!');
+    })->middleware(['signed', 'throttle:3,1'])->name('verification.verify');
 
     // Orders Management
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('order.show');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
 
     // Checkout Flow
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
@@ -104,6 +104,7 @@ Route::group(['middleware' => 'guest'], function () {
     Route::get('/forgot-password', [PasswordResetController::class, 'create'])
         ->name('password.request');
     Route::post('/forgot-password', [PasswordResetController::class, 'store'])
+        ->middleware('throttle:3,1')
         ->name('password.email');
 
     Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])

@@ -4,18 +4,6 @@ use App\Models\ProductModels\Category;
 use App\Models\ProductModels\Product;
 use App\Models\ProductModels\ProductVariant;
 use Database\Seeders\ProductSeeders\CategorySeeder;
-use Database\Seeders\ProductSeeders\ColorSeeder;
-use Database\Seeders\ProductSeeders\FitSeeder;
-use Database\Seeders\ProductSeeders\SizeSeeder;
-
-beforeEach(function () {
-    $this->seed([
-        CategorySeeder::class,
-        FitSeeder::class,
-        ColorSeeder::class,
-        SizeSeeder::class,
-    ]);
-});
 
 dataset('genders', array_keys(CategorySeeder::$data));
 
@@ -74,7 +62,14 @@ describe('Gender page', function () {
 
     it('shows an empty state message when no products exist', function (string $gender) {
         $this->get(route('gender.index', ['gender' => $gender]))
-            ->assertSeeText('No products yet — check back soon!');
+            ->assertOk()
+            ->assertViewHas('products', function ($products) {
+                return $products->isEmpty();
+            })
+            ->assertSeeTextInOrder([
+                'No products found.',
+                'We are updating our stock. Please check back soon!',
+            ]);
     })->with('genders');
 
 });

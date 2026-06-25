@@ -36,6 +36,16 @@ class OrderAdminController extends Controller
             'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
         ]);
 
+        if ($data['status'] === 'delivered') {
+            $order->payment->update([
+                'status' => 'completed',
+            ]);
+        } elseif ($data['status'] === 'cancelled') {
+            $order->payment->update([
+                'status' => 'refunded',
+            ]);
+        }
+
         $order->update($data);
 
         return back()->with('success', "Order #{$order->id} status updated to {$data['status']}.");

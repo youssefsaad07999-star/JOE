@@ -9,7 +9,7 @@
     <form action="{{ route('admin.products.update', $product) }}" method="POST" enctype="multipart/form-data">
         @csrf @method('PATCH')
 
-        <div class="grid lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             {{-- Main --}}
             <div class="lg:col-span-2 space-y-5">
@@ -43,7 +43,7 @@
                                              focus:outline-none focus:ring-2 focus:ring-[#C85C6E]/30 focus:border-[#C85C6E]">{{ old('description', $product->description) }}</textarea>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">
                                     Base Price
@@ -82,7 +82,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1.5">Fit</label>
                                 <select name="fit_id"
@@ -127,8 +127,8 @@
                         </h2>
                     </div>
 
-                    <div class="border border-gray-100 rounded-xl overflow-hidden">
-                        <table class="w-full text-sm">
+                    <div class="border border-gray-100 rounded-xl overflow-x-auto">
+                        <table class="w-full text-sm min-w-[650px]">
                             <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
                                     <th
@@ -157,7 +157,7 @@
                                         class="{{ !$variant->is_active ? 'bg-gray-50 opacity-60' : 'hover:bg-gray-50' }} transition-colors">
 
                                         {{-- Variant identity --}}
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 whitespace-nowrap">
                                             <div class="flex items-center gap-2">
                                                 <div class="w-3.5 h-3.5 rounded-full border border-gray-200 flex-shrink-0"
                                                     style="background-color: {{ $variant->color->hex_code ?? '#ccc' }}">
@@ -218,7 +218,7 @@
                                         </td>
 
                                         {{-- Active toggle --}}
-                                        <td class="px-4 py-3 text-center">
+                                        <td class="px-4 py-3 text-center whitespace-nowrap">
                                             <label class="relative inline-flex items-center cursor-pointer">
                                                 <input type="checkbox"
                                                     name="variants[{{ $variant->id }}][is_active]" value="1"
@@ -233,7 +233,7 @@
                                         </td>
 
                                         {{-- Delete variant --}}
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 text-right whitespace-nowrap">
                                             <button type="button"
                                                 onclick="if(confirm('Delete this variant? This cannot be undone.')) {
                                                         document.getElementById('delete-variant-{{ $variant->id }}').submit();
@@ -297,10 +297,10 @@
                     }
                 }">
 
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center justify-between mb-2 gap-4">
                         <h2 class="font-['Cormorant_Garamond'] text-xl font-semibold">Add New Variants</h2>
                         <button type="button" @click="open = !open"
-                            class="text-xs text-[#C85C6E] hover:underline flex items-center gap-1">
+                            class="text-xs text-[#C85C6E] hover:underline flex items-center gap-1 flex-shrink-0">
                             <svg class="w-3.5 h-3.5 transition-transform" :class="open ? 'rotate-45' : ''"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -315,7 +315,7 @@
 
                     <div x-show="open" x-transition style="display:none;">
 
-                        <div class="grid grid-cols-2 gap-6 mb-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-5">
                             {{-- Colors --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">1. Colours</label>
@@ -372,8 +372,8 @@
 
                         {{-- New variant matrix --}}
                         <div x-show="newVariants.length > 0" style="display:none;">
-                            <div class="border border-gray-100 rounded-xl overflow-hidden">
-                                <table class="w-full text-sm">
+                            <div class="border border-gray-100 rounded-xl overflow-x-auto">
+                                <table class="w-full text-sm min-w-[600px]">
                                     <thead class="bg-gray-50 border-b border-gray-100">
                                         <tr>
                                             <th
@@ -396,7 +396,7 @@
                                     <tbody class="divide-y divide-gray-100">
                                         <template x-for="(variant, i) in newVariants" :key="i">
                                             <tr>
-                                                <td class="px-4 py-3">
+                                                <td class="px-4 py-3 whitespace-nowrap">
                                                     <div class="flex items-center gap-2">
                                                         <div class="w-3.5 h-3.5 rounded-full border border-gray-200 flex-shrink-0"
                                                             :style="'background-color:' + colorHex(variant.color_id)">
@@ -492,7 +492,7 @@
                                         {{-- FIXED: Triggering the external form safely via JS onclick --}}
                                         <button type="button"
                                             onclick="if(confirm('Delete this image?')) document.getElementById('delete-image-{{ $img->id }}').submit();"
-                                            class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out transform translate-y-1 group-hover:translate-y-0 w-7 h-7 bg-white text-gray-500 rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 hover:scale-105 active:scale-95 cursor-pointer z-10">
+                                            class="absolute -top-2 -right-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-200 ease-in-out transform lg:translate-y-1 lg:group-hover:translate-y-0 w-7 h-7 bg-white text-gray-500 rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 hover:scale-105 active:scale-95 cursor-pointer z-10">
 
                                             {{-- Minimalist Trash Can Icon SVG --}}
                                             <svg class="w-3.5 h-3.5 transition-transform duration-200" fill="none"
@@ -561,7 +561,7 @@
                                                         {{-- FIXED: Triggering the external form safely via JS onclick --}}
                                                         <button type="button"
                                                             onclick="if(confirm('Delete this image?')) document.getElementById('delete-image-{{ $img->id }}').submit();"
-                                                            class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out transform translate-y-1 group-hover:translate-y-0 w-7 h-7 bg-white text-gray-500 rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 hover:scale-105 active:scale-95 cursor-pointer z-10">
+                                                            class="absolute -top-2 -right-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-200 ease-in-out transform lg:translate-y-1 lg:group-hover:translate-y-0 w-7 h-7 bg-white text-gray-500 rounded-full flex items-center justify-center border border-gray-200 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-600 hover:scale-105 active:scale-95 cursor-pointer z-10">
 
                                                             {{-- Minimalist Trash Can Icon SVG --}}
                                                             <svg class="w-3.5 h-3.5 transition-transform duration-200"

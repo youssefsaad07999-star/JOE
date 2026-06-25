@@ -4,8 +4,8 @@
 
     <x-slot:actions>
         <button @click="$dispatch('open-add-category')"
-            class="bg-[#C85C6E] text-white px-4 py-2 rounded-xl text-sm font-medium
-                       hover:bg-[#b54e60] transition-colors flex items-center gap-2">
+            class="w-full sm:w-auto bg-[#C85C6E] text-white px-4 py-2 rounded-xl text-sm font-medium
+                       hover:bg-[#b54e60] transition-colors flex items-center justify-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -44,7 +44,8 @@
             x-transition:enter-end="opacity-100" @click.self="open = false"
             class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" style="display:none;">
 
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md" @click.stop>
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto"
+                @click.stop>
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <h3 class="font-['Cormorant_Garamond'] text-xl font-semibold">Add Category</h3>
                     <button @click="open = false" class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
@@ -126,22 +127,26 @@
             <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
 
                 {{-- Gender row --}}
-                <div class="flex items-center justify-between px-6 py-4 bg-[#1C1C1C] text-white">
-                    <div class="flex items-center gap-3">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div
+                    class="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 py-4 bg-[#1C1C1C] text-white gap-3">
+                    <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-wrap">
+                        <svg class="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                         </svg>
-                        <div>
-                            <span class="font-medium">{{ $gender->name }}</span>
-                            <span class="text-xs text-gray-400 ml-2 font-mono">{{ $gender->slug }}</span>
+                        <div class="min-w-0 flex items-center gap-2 flex-wrap">
+                            <span class="font-medium truncate">{{ $gender->name }}</span>
+                            <span
+                                class="text-xs text-gray-400 font-mono truncate max-w-[110px] sm:max-w-none">{{ $gender->slug }}</span>
                         </div>
-                        <span class="text-[10px] uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded">
+                        <span class="text-[10px] uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded shrink-0">
                             Gender
                         </span>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs text-gray-400">
+                    <div
+                        class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-white/10 pt-3 sm:border-t-0 sm:pt-0">
+                        <span class="text-xs text-gray-400 whitespace-nowrap">
                             {{ $gender->children->count() }} categories
                         </span>
                         @include('admin.categories._row_actions', ['category' => $gender])
@@ -152,26 +157,33 @@
                 @foreach ($gender->children as $category)
                     <div class="border-t border-gray-100">
                         <div
-                            class="flex items-center justify-between px-6 py-3 bg-gray-50 hover:bg-gray-100 transition-colors">
-                            <div class="flex items-center gap-3 pl-6">
-                                <div class="w-px h-4 bg-gray-300"></div>
-                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor"
+                            class="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 py-3 bg-gray-50 hover:bg-gray-100 transition-colors gap-3">
+                            <div class="flex items-center gap-2 sm:gap-3 pl-2 sm:pl-6 min-w-0 flex-wrap">
+                                <div class="w-px h-4 bg-gray-300 hidden sm:block"></div>
+                                <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
-                                <span class="text-sm font-medium">{{ $category->name }}</span>
-                                <span class="text-xs text-gray-400 font-mono">{{ $category->slug }}</span>
-                                <span
-                                    class="text-[10px] uppercase tracking-wider bg-blue-100 text-blue-600 px-2 py-0.5 rounded">
-                                    Category
-                                </span>
-                                @if (!$category->is_active)
-                                    <span class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded">Hidden</span>
-                                @endif
+                                <div class="min-w-0 flex items-center gap-2 flex-wrap">
+                                    <span class="text-sm font-medium truncate">{{ $category->name }}</span>
+                                    <span
+                                        class="text-xs text-gray-400 font-mono truncate max-w-[100px] sm:max-w-none">{{ $category->slug }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span
+                                        class="text-[10px] uppercase tracking-wider bg-blue-100 text-blue-600 px-2 py-0.5 rounded shrink-0">
+                                        Category
+                                    </span>
+                                    @if (!$category->is_active)
+                                        <span
+                                            class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded shrink-0">Hidden</span>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-xs text-gray-400">
+                            <div
+                                class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-gray-200/60 pt-2.5 sm:border-t-0 sm:pt-0 pl-2 sm:pl-0">
+                                <span class="text-xs text-gray-400 whitespace-nowrap">
                                     {{ $category->children->count() }} subcategories
                                 </span>
                                 @include('admin.categories._row_actions', ['category' => $category])
@@ -181,23 +193,27 @@
                         {{-- Subcategory rows --}}
                         @foreach ($category->children as $sub)
                             <div
-                                class="flex items-center justify-between px-6 py-2.5
-                                        border-t border-gray-50 hover:bg-gray-50 transition-colors">
-                                <div class="flex items-center gap-3 pl-16">
-                                    <div class="w-px h-3 bg-gray-200"></div>
-                                    <span class="text-sm text-gray-700">{{ $sub->name }}</span>
-                                    <span class="text-xs text-gray-400 font-mono">{{ $sub->slug }}</span>
+                                class="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 py-2.5 
+                                        border-t border-gray-50 hover:bg-gray-50 transition-colors gap-2">
+                                <div class="flex items-center gap-2 sm:gap-3 pl-6 sm:pl-10 md:pl-16 min-w-0 flex-wrap">
+                                    <div class="w-px h-3 bg-gray-200 hidden sm:block"></div>
+                                    <span class="text-sm text-gray-700 truncate">{{ $sub->name }}</span>
                                     <span
-                                        class="text-[10px] uppercase tracking-wider bg-[#C85C6E]/10 text-[#C85C6E] px-2 py-0.5 rounded">
-                                        Sub
-                                    </span>
-                                    @if (!$sub->is_active)
+                                        class="text-xs text-gray-400 font-mono truncate max-w-[80px] sm:max-w-none">{{ $sub->slug }}</span>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
                                         <span
-                                            class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded">Hidden</span>
-                                    @endif
+                                            class="text-[10px] uppercase tracking-wider bg-[#C85C6E]/10 text-[#C85C6E] px-2 py-0.5 rounded shrink-0">
+                                            Sub
+                                        </span>
+                                        @if (!$sub->is_active)
+                                            <span
+                                                class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded shrink-0">Hidden</span>
+                                        @endif
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs text-gray-400">
+                                <div
+                                    class="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t border-gray-100 pt-2 sm:border-t-0 sm:pt-0 pl-6 sm:pl-0">
+                                    <span class="text-xs text-gray-400 whitespace-nowrap">
                                         {{ $sub->products_count }} products
                                     </span>
                                     @include('admin.categories._row_actions', ['category' => $sub])

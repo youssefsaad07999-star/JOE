@@ -26,24 +26,24 @@
             color="amber" />
     </div>
 
-    <div class="grid lg:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
         {{-- Revenue Chart --}}
-        <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="font-['Cormorant_Garamond'] text-xl font-semibold">Revenue — Last 7 Days</h2>
+        <div class="lg:col-span-2 bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-6">
+                <h2 class="font-['Cormorant_Garamond'] text-xl font-semibold text-gray-900">Revenue — Last 7 Days</h2>
                 <span class="text-sm text-gray-400 font-light">
                     Total: ${{ number_format($chartData->sum('revenue'), 2) }}
                 </span>
             </div>
 
-            <div class="flex items-end gap-2 h-40">
+            <div class="flex items-end gap-1 sm:gap-2 h-40 pt-4">
                 @foreach ($chartData as $day)
                     @php
                         $height = $chartMax > 0 ? round(($day['revenue'] / $chartMax) * 100) : 0;
                     @endphp
-                    <div class="flex-1 flex flex-col items-center gap-1.5">
-                        <span class="text-xs text-gray-400 font-light">
+                    <div class="flex-1 flex flex-col items-center gap-1.5 min-w-0">
+                        <span class="text-[10px] sm:text-xs text-gray-400 font-light truncate max-w-full block h-4">
                             @if ($day['revenue'] > 0)
                                 ${{ number_format($day['revenue'], 0) }}
                             @endif
@@ -54,19 +54,20 @@
                             <div
                                 class="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#1C1C1C] text-white
                                         text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0
-                                        group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                        group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-md">
                                 ${{ number_format($day['revenue'], 2) }}
                             </div>
                         </div>
-                        <span class="text-xs text-gray-400">{{ $day['label'] }}</span>
+                        <span
+                            class="text-[10px] sm:text-xs text-gray-400 font-medium truncate max-w-full block">{{ $day['label'] }}</span>
                     </div>
                 @endforeach
             </div>
         </div>
 
         {{-- Order Status Breakdown --}}
-        <div class="bg-white rounded-2xl p-6 shadow-sm">
-            <h2 class="font-['Cormorant_Garamond'] text-xl font-semibold mb-5">Orders by Status</h2>
+        <div class="bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
+            <h2 class="font-['Cormorant_Garamond'] text-xl font-semibold mb-5 text-gray-900">Orders by Status</h2>
             @php
                 $total = $statusBreakdown->sum();
                 $statusColors = [
@@ -77,13 +78,13 @@
                     'cancelled' => 'bg-red-400',
                 ];
             @endphp
-            <div class="space-y-3">
+            <div class="space-y-4">
                 @foreach ($statusBreakdown as $status => $count)
                     @php $pct = $total > 0 ? round(($count / $total) * 100) : 0; @endphp
                     <div>
-                        <div class="flex justify-between text-sm mb-1">
+                        <div class="flex justify-between text-sm mb-1.5">
                             <span class="capitalize font-light text-gray-600">{{ $status }}</span>
-                            <span class="font-medium">{{ $count }}</span>
+                            <span class="font-medium text-gray-900">{{ $count }}</span>
                         </div>
                         <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                             <div class="h-full rounded-full {{ $statusColors[$status] ?? 'bg-gray-400' }}"
@@ -96,84 +97,97 @@
         </div>
     </div>
 
-    <div class="grid lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {{-- Recent Orders --}}
         <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h2 class="font-['Cormorant_Garamond'] text-xl font-semibold">Recent Orders</h2>
-                {{-- {{ route('admin.orders.index') }} --}}
-                <a href="" class="text-xs text-[#C85C6E] hover:underline">View all
-                    →</a>
+            <div class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100">
+                <h2 class="font-['Cormorant_Garamond'] text-xl font-semibold text-gray-900">Recent Orders</h2>
+                <a href="{{ route('admin.orders.index') }}"
+                    class="text-xs text-[#C85C6E] hover:underline font-medium">View all &rarr;</a>
             </div>
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b border-gray-100">
-                        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                            Order</th>
-                        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                            Customer</th>
-                        <th class="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                            Status</th>
-                        <th class="text-right px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                            Total</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($recentOrders as $order)
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-3">
-                                {{-- {{ route('admin.orders.show', $order) }} --}}
-                                <a href="" class="text-sm font-medium hover:text-[#C85C6E] transition-colors">
-                                    #{{ $order->id }}
-                                </a>
-                                <p class="text-xs text-gray-400">{{ $order->created_at->diffForHumans() }}</p>
-                            </td>
-                            <td class="px-6 py-3 text-sm text-gray-600">
-                                {{ $order->user?->name ?? '—' }}
-                            </td>
-                            <td class="px-6 py-3">
-                                <x-admin.badge :status="$order->status" />
-                            </td>
-                            <td class="px-6 py-3 text-sm font-semibold text-right">
-                                ${{ number_format($order->total_price, 2) }}
-                            </td>
+
+            <div class="w-full overflow-x-auto">
+                <table class="w-full min-w-[500px] table-auto">
+                    <thead>
+                        <tr class="border-b border-gray-100 bg-gray-50/75">
+                            <th
+                                class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                                Order
+                            </th>
+                            <th
+                                class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                                Customer
+                            </th>
+                            <th
+                                class="text-left px-4 sm:px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                                Status
+                            </th>
+                            <th
+                                class="text-right px-4 sm:px-6 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                                Total
+                            </th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-gray-400 text-sm">
-                                No orders yet
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @forelse($recentOrders as $order)
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-4 sm:px-6 py-3.5 vertical-align-middle">
+                                    <a href=""
+                                        class="text-sm font-medium text-gray-900 hover:text-[#C85C6E] transition-colors">
+                                        #{{ $order->id }}
+                                    </a>
+                                    <p class="text-xs text-gray-400 mt-0.5">{{ $order->created_at->diffForHumans() }}
+                                    </p>
+                                </td>
+                                <td class="px-4 sm:px-6 py-3.5 text-sm text-gray-600 vertical-align-middle">
+                                    {{ $order->user?->name ?? '—' }}
+                                </td>
+                                <td class="px-4 sm:px-6 py-3.5 vertical-align-middle">
+                                    <x-admin.badge :status="$order->status" />
+                                </td>
+                                <td
+                                    class="px-4 sm:px-6 py-3.5 text-sm font-semibold text-gray-900 text-right vertical-align-middle">
+                                    ${{ number_format($order->total_price, 2) }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4"
+                                    class="px-4 sm:px-6 py-12 text-center text-gray-400 text-sm bg-white">
+                                    No orders yet
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         {{-- Low Stock --}}
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                <h2 class="font-['Cormorant_Garamond'] text-xl font-semibold">Low Stock</h2>
+            <div class="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-gray-100">
+                <h2 class="font-['Cormorant_Garamond'] text-xl font-semibold text-gray-900">Low Stock</h2>
                 <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
                     Alert
                 </span>
             </div>
             <div class="divide-y divide-gray-50">
                 @forelse($lowStock as $variant)
-                    <div class="px-6 py-3 flex items-center justify-between gap-3">
-                        <div class="min-w-0">
-                            <p class="text-sm font-medium truncate">{{ $variant->product->name }}</p>
-                            <p class="text-xs text-gray-400">
+                    <div class="px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium text-gray-900 truncate">{{ $variant->product->name }}</p>
+                            <p class="text-xs text-gray-400 mt-0.5 truncate">
                                 {{ $variant->size->name }} · {{ ucfirst($variant->color->name) }}
                             </p>
                         </div>
                         <span
-                            class="text-sm font-bold {{ $variant->stock_quantity <= 2 ? 'text-red-600' : 'text-amber-600' }} flex-shrink-0">
+                            class="text-sm font-bold {{ $variant->stock_quantity <= 2 ? 'text-red-600' : 'text-amber-600' }} shrink-0">
                             {{ $variant->stock_quantity }} left
                         </span>
                     </div>
                 @empty
-                    <div class="px-6 py-8 text-center text-gray-400 text-sm">
+                    <div class="px-4 sm:px-6 py-12 text-center text-gray-400 text-sm bg-white">
                         All variants well stocked
                     </div>
                 @endforelse

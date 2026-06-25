@@ -4,18 +4,6 @@ use App\Models\ProductModels\Category;
 use App\Models\ProductModels\Product;
 use App\Models\ProductModels\ProductVariant;
 use Database\Seeders\ProductSeeders\CategorySeeder;
-use Database\Seeders\ProductSeeders\ColorSeeder;
-use Database\Seeders\ProductSeeders\FitSeeder;
-use Database\Seeders\ProductSeeders\SizeSeeder;
-
-beforeEach(function () {
-    $this->seed([
-        CategorySeeder::class,
-        FitSeeder::class,
-        ColorSeeder::class,
-        SizeSeeder::class,
-    ]);
-});
 
 dataset('genders', array_keys(CategorySeeder::$data));
 
@@ -186,7 +174,13 @@ describe('Subcategory page', function () {
             'gender' => $gender,
             'category' => $category->slug,
             'subcategory' => $category->children->first()->slug,
-        ]))->assertSeeText('No products available, stay tuned!.');
+        ]))
+            ->assertOk()
+            ->assertViewHas('products', function ($products) {
+                return $products->isEmpty();
+            })
+            ->assertSeeText('No products available in this section yet.');
+
     })->with('genders');
 
 });

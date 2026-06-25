@@ -2,15 +2,24 @@
 
 namespace App\Providers;
 
+use App\Listeners\HandlePaddleTransactionCompleted;
+use App\Listeners\HandlePaddleTransactionUpdated;
+use App\Listeners\MergeGuestCart;
+use App\Listeners\SendWelcomeNotificationAfterVerification;
 use App\Models\Order;
 use App\Models\ProductModels\CartItem;
 use App\Models\ProductModels\Category;
 use App\Models\ProductModels\Product;
 use App\Models\User;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Paddle\Events\TransactionCompleted;
+use Laravel\Paddle\Events\TransactionUpdated;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +36,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Event::listen(TransactionCompleted::class, HandlePaddleTransactionCompleted::class);
+        // Event::listen(TransactionUpdated::class, HandlePaddleTransactionUpdated::class);
+
+        // Event::listen(
+        //     Verified::class,
+        //     SendWelcomeNotificationAfterVerification::class
+        // );
+        // Event::listen(Login::class, MergeGuestCart::class);
 
         Blade::if('active', function ($routeName) {
             return Route::is($routeName);

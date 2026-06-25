@@ -4,18 +4,6 @@ use App\Models\ProductModels\Category;
 use App\Models\ProductModels\Product;
 use App\Models\ProductModels\ProductVariant;
 use Database\Seeders\ProductSeeders\CategorySeeder;
-use Database\Seeders\ProductSeeders\ColorSeeder;
-use Database\Seeders\ProductSeeders\FitSeeder;
-use Database\Seeders\ProductSeeders\SizeSeeder;
-
-beforeEach(function () {
-    $this->seed([
-        CategorySeeder::class,
-        FitSeeder::class,
-        ColorSeeder::class,
-        SizeSeeder::class,
-    ]);
-});
 
 dataset('genders', array_keys(CategorySeeder::$data));
 

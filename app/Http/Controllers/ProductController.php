@@ -9,11 +9,6 @@ class ProductController extends Controller
 {
     public function home()
     {
-        if (auth()->check() && ! auth()->user()->hasVerifiedEmail()) {
-
-            return redirect()->route('verification.notice');
-        }
-
         $genders = Category::genders()->active()->orderBy('sort_order')->get();
 
         return view('welcome', compact('genders'));
@@ -30,7 +25,7 @@ class ProductController extends Controller
             ->whereHas('category.parent.parent', fn ($q) => $q->where('id', $gender->id))
             ->with('category.parent.parent')
             ->latest()
-            ->get();
+            ->paginate(16);
 
         return view('product.gender.index', compact('gender', 'categories', 'products'));
     }
@@ -43,7 +38,7 @@ class ProductController extends Controller
             ->isActive()
             ->whereHas('category', fn ($q) => $q->where('parent_id', $category->id))
             ->latest()
-            ->get();
+            ->paginate(16);
 
         return view('product.category.show', compact('gender', 'category', 'subcategories', 'products'));
 

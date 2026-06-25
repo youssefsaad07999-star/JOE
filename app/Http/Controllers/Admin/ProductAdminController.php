@@ -184,6 +184,7 @@ class ProductAdminController extends Controller
             'brand_id' => 'nullable|exists:brands,id',
             'is_active' => 'boolean',
             'images.*' => 'nullable|image|max:5120',
+            'color_images.*.*' => 'nullable|image|max:5120',
 
             // Validation rules matching existing table inputs
             'variants' => 'nullable|array',
@@ -216,11 +217,16 @@ class ProductAdminController extends Controller
                 'is_active' => $request->boolean('is_active'),
             ]);
 
+            $colorVariantMap = [];
             // A. Handle Existing Variants (Updates & Active Toggles)
             $submittedVariants = $data['variants'] ?? [];
 
             foreach ($product->variants as $variant) {
+                if ($variant->color_id && ! isset($colorVariantMap[$variant->color_id])) {
+                    $colorVariantMap[$variant->color_id] = $variant->id;
+                }
                 if (isset($submittedVariants[$variant->id])) {
+
                     $vData = $submittedVariants[$variant->id];
 
                     $variant->update([
@@ -233,6 +239,7 @@ class ProductAdminController extends Controller
 
                     $variant->update(['is_active' => 0]);
                 }
+
             }
 
             if (! empty($data['new_variants'])) {
@@ -244,7 +251,7 @@ class ProductAdminController extends Controller
                         ->exists();
 
                     if (! $exists) {
-                        ProductVariant::create([
+                        $newVariant = ProductVariant::create([
                             'product_id' => $product->id,
                             'color_id' => $newVariantData['color_id'],
                             'size_id' => $newVariantData['size_id'],
@@ -253,6 +260,10 @@ class ProductAdminController extends Controller
                             'price_override' => $newVariantData['price_override'] ?: null,
                             'is_active' => 1,
                         ]);
+
+                        if (! isset($colorVariantMap[$newVariant->color_id])) {
+                            $colorVariantMap[$newVariant->color_id] = $newVariant->id;
+                        }
                     }
                 }
             }
@@ -307,7 +318,7 @@ class ProductAdminController extends Controller
                             ProductImage::create([
                                 'product_id' => $product->id,
                                 'color_id' => $colorId,
-                                'product_variant_id' => null,
+                                'product_variant_id' => $colorVariantMap[$colorId] ?? null,
                                 'image_path' => $fileName,
                                 'is_primary' => false,
                             ]);
@@ -321,22 +332,49 @@ class ProductAdminController extends Controller
 
     }
 
-    // public function destroy(Product $product)
-    // {
+    public function destroy(Product $product)
+    {
 
-    //     foreach ($product->images ?? [] as $img) {
-    //         Storage::disk('public')->delete($img->image_path);
-    //     }
+        foreach ($product->images ?? [] as $img) {
+            Storage::disk('public')->delete($img->image_path);
+        }
 
-    //     $product->delete();
+        $product->delete();
 
-    //     return redirect()->route('admin.products.index')
-    //         ->with('success', 'Product deleted.');
-    // }
+        return redirect()->route('admin.products.index')
+            ->with('success', 'Product deleted.');
+    }
 
     public function destroyVariant(ProductVariant $variant)
     {
-        $variant->delete();
+        DB::transaction(function () use ($variant) {
+            // 1. Check if there are other sizes of the same color for this product
+            $siblingVariant = ProductVariant::where('product_id', $variant->product_id)
+                ->where('color_id', $variant->color_id)
+                ->where('id', '!=', $variant->id)
+                ->first();
+
+            if ($siblingVariant) {
+                // SIBLINGS EXIST: Do NOT delete files from storage.
+                // Reassign the images from the old variant to the surviving sibling variant.
+                ProductImage::where('product_variant_id', $variant->id)
+                    ->update(['product_variant_id' => $siblingVariant->id]);
+            } else {
+                // NO SIBLINGS: This was the absolute last variant of this color.
+                // Fetch all images tied to this specific product color combination.
+                $colorImages = ProductImage::where('product_id', $variant->product_id)
+                    ->where('color_id', $variant->color_id)
+                    ->get();
+
+                // Clear physical files from disk and drop the database records
+                foreach ($colorImages as $img) {
+                    Storage::disk('public')->delete($img->image_path);
+                    $img->delete();
+                }
+            }
+
+            $variant->delete();
+        });
 
         return back()->with('success', 'Variant deleted successfully.');
     }
