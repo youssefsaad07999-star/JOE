@@ -291,10 +291,9 @@
                 </div>
 
                 {{-- Purchase Request Pipeline --}}
-                <form action="{{ route('cart.store') }}" method="POST" class="mt-6 space-y-6">
-                    @csrf
-                    <input type="hidden" name="product_variant_id" :value="selectedVariant?.id">
-                    <input type="hidden" name="quantity" :value="qty">
+                <form @submit.prevent="$dispatch('add-to-cart', { variantId: selectedVariant?.id, quantity: qty })"
+                    class="mt-6 space-y-6">
+
 
                     {{-- Attribute 1: Color Configuration Swatches --}}
                     @if ($colors->isNotEmpty())
@@ -417,8 +416,9 @@
 
                     {{-- Interactive Form Actions Execution Bar --}}
                     <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                        {{-- 🎯 FIXED: Changed "flex-1" to "w-full sm:flex-1" --}}
                         <button type="submit" :disabled="!selectedVariant || !inStock"
-                            class="flex-1 h-14 rounded-full font-medium text-sm tracking-wide transition-all duration-300 shadow-sm border select-none uppercase"
+                            class="w-full sm:flex-1 h-14 rounded-full font-medium text-sm tracking-wide transition-all duration-300 shadow-sm border select-none uppercase"
                             :class="selectedVariant && inStock ?
                                 'bg-gray-900 border-gray-900 text-white hover:bg-[#C85C6E] hover:border-[#C85C6E] hover:shadow-md cursor-pointer' :
                                 'bg-gray-100 border-gray-100 text-gray-400 cursor-not-allowed'">

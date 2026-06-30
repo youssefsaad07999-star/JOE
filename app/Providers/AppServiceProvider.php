@@ -2,24 +2,16 @@
 
 namespace App\Providers;
 
-use App\Listeners\HandlePaddleTransactionCompleted;
-use App\Listeners\HandlePaddleTransactionUpdated;
-use App\Listeners\MergeGuestCart;
-use App\Listeners\SendWelcomeNotificationAfterVerification;
 use App\Models\Order;
 use App\Models\ProductModels\CartItem;
 use App\Models\ProductModels\Category;
 use App\Models\ProductModels\Product;
 use App\Models\User;
-use Illuminate\Auth\Events\Login;
-use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Paddle\Events\TransactionCompleted;
-use Laravel\Paddle\Events\TransactionUpdated;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,14 +28,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Event::listen(TransactionCompleted::class, HandlePaddleTransactionCompleted::class);
-        // Event::listen(TransactionUpdated::class, HandlePaddleTransactionUpdated::class);
 
-        // Event::listen(
-        //     Verified::class,
-        //     SendWelcomeNotificationAfterVerification::class
-        // );
-        // Event::listen(Login::class, MergeGuestCart::class);
+        Livewire::forceAssetInjection();
 
         Blade::if('active', function ($routeName) {
             return Route::is($routeName);
@@ -76,7 +62,24 @@ class AppServiceProvider extends ServiceProvider
          * scoped to the already-resolved {gender}
          */
         Route::bind('category', function (string $slug) {
-            $gender = request()->route('gender');
+
+            if (request()->hasHeader('X-Livewire')) {
+                $browserUrl = request()->header('referer');
+
+                // 2. Extract just the path portion if you prefer (e.g., "/men/t-shirt")
+                $browserPath = parse_url($browserUrl, PHP_URL_PATH);
+
+                $segments = array_values(array_filter(explode('/', $browserPath)));
+
+                $gender = Category::genders()->active()->where('slug', $segments[0] ?? null)->first();
+
+            } else {
+                $gender = request()->route('gender');
+            }
+
+            if (! $gender || ! isset($gender->id)) {
+                return null;
+            }
 
             return Category::categories()
                 ->active()
@@ -90,7 +93,27 @@ class AppServiceProvider extends ServiceProvider
          * scoped to the already-resolved {category}
          */
         Route::bind('subcategory', function (string $slug) {
-            $category = request()->route('category');
+
+            if (request()->hasHeader('X-Livewire')) {
+                $browserUrl = request()->header('referer');
+
+                $browserPath = parse_url($browserUrl, PHP_URL_PATH);
+
+                $segments = array_values(array_filter(explode('/', $browserPath)));
+
+                $category = Category::categories()->active()
+                    ->whereHas('parent', function ($query) use ($segments) {
+                        $query->where('depth', 'gender')->where('slug', $segments[0] ?? null);
+                    })
+                    ->where('slug', $segments[1] ?? null)
+                    ->first();
+            } else {
+                $category = request()->route('category');
+            }
+
+            if (! $category || ! isset($category->id)) {
+                return null;
+            }
 
             return Category::subcategories()
                 ->active()
@@ -100,19 +123,10 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Route::bind('adminCategory', function (string $id) {
-            return Category::findOrFail($id); // plain ID lookup, no scope
+            return Category::findOrFail($id);
         });
 
         Route::bind('product', function (string $slug) {
-            $subcategory = request()->route('subcategory');
-
-            if ($subcategory) {
-                return Product::with(['variants.size', 'variants.color', 'images', 'primaryImage', 'fit', 'brand'])
-                    ->where('slug', $slug)
-                    ->where('category_id', $subcategory->id)
-                    ->first();
-            }
-
             return Product::with(['variants.size', 'variants.color', 'images', 'primaryImage', 'fit', 'brand'])
                 ->where('slug', $slug)
                 ->first();
