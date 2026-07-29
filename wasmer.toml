@@ -1,8 +1,0 @@
-[build]
-command = "composer install --no-dev --optimize-autoloader --no-interaction && npm install && npm run build"
-
-[run]
-command = "php artisan serve --host=0.0.0.0 --port=$PORT"
-
-[deploy]
-command = "php artisan migrate --force --no-interaction && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan db:seed --force --no-interaction"
