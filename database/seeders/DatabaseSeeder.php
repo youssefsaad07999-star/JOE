@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             FitSeeder::class,
             ColorSeeder::class,
             SizeSeeder::class,
+            SuperAdminSeeder::class,
             // ShippingMethodSeeder::class,
             // ShopSettingsSeeder::class,
             // CountrySeeder::class,
