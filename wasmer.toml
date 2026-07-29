@@ -5,7 +5,7 @@ name = "joe"
 command = "npm install && npm run build"
 
 [deploy]
-command = "php artisan migrate --force --no-interaction && php artisan config:cache && php artisan route:cache && php artisan view:cache"
+command = "APP_ENV=local php artisan migrate --no-interaction && APP_ENV=local php artisan db:seed --force --no-interaction && APP_ENV=production php artisan config:cache && php artisan route:cache && php artisan view:cache"
 
 [[command]]
 name = "web"
