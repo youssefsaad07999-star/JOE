@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Models\ProductModels\CartItem;
+use App\Models\CartItem;
 use Illuminate\Auth\Events\Login;
 
 class MergeGuestCart
@@ -20,7 +20,6 @@ class MergeGuestCart
      */
     public function handle(Login $event): void
     {
-        // dd('hello', session('guest_session_id'));
         $sessionId = session('guest_session_id');
 
         $guestItems = CartItem::forSession($sessionId)->get();

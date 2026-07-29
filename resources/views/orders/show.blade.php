@@ -25,24 +25,76 @@
             {{-- Status badge --}}
             <span
                 class="self-start sm:self-center px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase
-            {{ match ($order->status) {
-                'delivered' => 'bg-emerald-100 text-emerald-700',
-                'shipped' => 'bg-blue-100 text-blue-700',
-                'processing' => 'bg-amber-100 text-amber-700',
-                'cancelled' => 'bg-red-100 text-red-700',
-                default => 'bg-gray-100 text-gray-600',
-            } }}">
-                {{ ucfirst($order->status) }}
+{{ match ($order->status?->value ?? $order->status) {
+    'delivered' => 'bg-emerald-100 text-emerald-700',
+    'shipped' => 'bg-blue-100 text-blue-700',
+    'processing' => 'bg-amber-100 text-amber-700',
+    'cancelled' => 'bg-red-100 text-red-700',
+    'refunded' => 'bg-rose-100 text-rose-700',
+    default => 'bg-gray-100 text-gray-600',
+} }}">
+                {{ $order->status?->getLabel() ?? ucfirst($order->status?->value ?? $order->status) }}
             </span>
         </div>
 
         {{-- Status Timeline --}}
-        @if ($order->status !== 'cancelled')
+
+        {{-- 1. REFUNDED STATE: Display Refund Alert Card --}}
+        @if (($order->status?->value ?? $order->status) === 'refunded')
+            <div class="bg-rose-50 border border-rose-200 rounded-2xl p-6 mb-6 text-rose-800">
+                <div class="flex items-start gap-3">
+                    <svg class="w-6 h-6 text-rose-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" />
+                    </svg>
+                    <div>
+                        <h4 class="font-semibold text-sm">Order Refunded</h4>
+                        <p class="text-xs text-rose-700 mt-1">
+                            This order has been fully refunded
+                            @if ($order->refunded_at)
+                                on {{ \Carbon\Carbon::parse($order->refunded_at)->format('M d, Y') }}
+                            @endif.
+                        </p>
+                        @if ($order->refund_reason)
+                            <p class="text-xs text-rose-600 italic mt-2">
+                                Reason: "{{ $order->refund_reason }}"
+                            </p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- 2. CANCELLED STATE: Display Cancelled Alert Card --}}
+        @elseif (($order->status?->value ?? $order->status) === 'cancelled')
+            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-6 text-gray-700">
+                <div class="flex items-center gap-3">
+                    <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <h4 class="font-semibold text-sm">Order Cancelled</h4>
+                        @if ($order->refund_reason)
+                            <p class="text-xs text-gray-500 mt-0.5">{{ $order->refund_reason }}</p>
+                        @else
+                            <p class="text-xs text-gray-500 mt-0.5">This order was cancelled and is no longer being
+                                processed.</p>
+                        @endif
+
+                    </div>
+                </div>
+            </div>
+
+            {{-- 3. ACTIVE ORDER STATE: Display Your Exact Progress Timeline --}}
+        @else
             <div class="bg-white rounded-2xl p-8 shadow-sm mb-6">
                 @php
                     $statuses = ['pending', 'processing', 'shipped', 'delivered'];
                     $labels = ['Ordered', 'Processing', 'Shipped', 'Delivered'];
-                    $currentIdx = array_search($order->status, $statuses) ?: 0;
+                    $currentStatus = $order->status?->value ?? $order->status;
+                    $currentIdx =
+                        array_search($currentStatus, $statuses) !== false ? array_search($currentStatus, $statuses) : 0;
                 @endphp
 
                 <div class="flex items-center">
@@ -51,7 +103,7 @@
                         <div class="flex flex-col items-center flex-shrink-0">
                             <div
                                 class="w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all
-                                {{ $idx <= $currentIdx ? 'bg-[#C85C6E] border-[#C85C6E]' : 'bg-white border-gray-200' }}">
+                        {{ $idx <= $currentIdx ? 'bg-[#C85C6E] border-[#C85C6E]' : 'bg-white border-gray-200' }}">
                                 @if ($idx <= $currentIdx)
                                     <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd"
@@ -64,7 +116,7 @@
                             </div>
                             <span
                                 class="mt-2 text-xs whitespace-nowrap
-                                 {{ $idx <= $currentIdx ? 'text-[#1C1C1C] font-medium' : 'text-gray-400' }}">
+                         {{ $idx <= $currentIdx ? 'text-[#1C1C1C] font-medium' : 'text-gray-400' }}">
                                 {{ $labels[$idx] }}
                             </span>
                         </div>
@@ -73,7 +125,7 @@
                         @if (!$loop->last)
                             <div
                                 class="flex-1 h-0.5 mx-2 mb-5
-                                {{ $idx < $currentIdx ? 'bg-[#C85C6E]' : 'bg-gray-100' }}">
+                        {{ $idx < $currentIdx ? 'bg-[#C85C6E]' : 'bg-gray-100' }}">
                             </div>
                         @endif
                     @endforeach
@@ -209,31 +261,33 @@
                 </div>
 
                 {{-- Payment --}}
-                <div class="bg-white rounded-2xl p-5 shadow-sm">
-                    <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
-                        Payment
-                    </h3>
-                    <p class="text-sm text-gray-600 font-light capitalize">
-                        {{ str_replace('_', ' ', $order->payment?->method ?? 'Cash on delivery') }}
-                    </p>
-                    @if ($order->payment)
+                @if ($order->payment)
+                    <div class="bg-white rounded-2xl p-5 shadow-sm">
+                        <h3 class="font-semibold text-sm mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                            Payment
+                        </h3>
+                        <p class="text-sm text-gray-600 font-light capitalize">
+                            {{ str_replace('_', ' ', $order->payment?->method ?? 'Processing') }}
+                        </p>
+
                         <span
                             class="inline-flex items-center gap-1 mt-2 text-xs px-2.5 py-1 rounded-full
-                        {{ $order->payment->status === 'completed' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                        {{ $order->payment->status->value === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
                             <span
                                 class="w-1.5 h-1.5 rounded-full
-                            {{ $order->payment->status === 'completed' ? 'bg-emerald-500' : 'bg-amber-500' }}">
+                            {{ $order->payment->status->value === 'paid' ? 'bg-emerald-500' : 'bg-amber-500' }}">
                             </span>
-                            {{ ucfirst($order->payment->status ?? 'pending') }}
+                            {{ ucfirst($order->payment->status?->getLabel() ?? 'pending') }}
                         </span>
-                    @endif
-                </div>
-
+                @endif
             </div>
+
         </div>
+    </div>
     </div>
 </x-layout>

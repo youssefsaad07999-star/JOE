@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\ProductControllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\ProductModels\CartItem;
-use App\Models\ProductModels\ProductVariant;
+use App\Models\CartItem;
+use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\ShopSetting;
 use Illuminate\Http\Request;

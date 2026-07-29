@@ -60,38 +60,38 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::post('/paddle/webhook', WebhookController::class);
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'verified'])->group(function () {
-    Route::get('/', DashboardController::class)->name('dashboard');
+// Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'verified'])->group(function () {
+//     Route::get('/', DashboardController::class)->name('dashboard');
 
-    // Orders — no create (orders come from customers)
-    Route::resource('orders', OrderAdminController::class)
-        ->only(['index', 'show', 'update']);
+//     // Orders — no create (orders come from customers)
+//     Route::resource('orders', OrderAdminController::class)
+//         ->only(['index', 'show', 'update']);
 
-    // Products — full CRUD
-    Route::resource('products', ProductAdminController::class);
-    Route::delete('products/variants/{variant}', [ProductAdminController::class, 'destroyVariant'])
-        ->name('products.variants.destroy');
-    Route::delete('products/images/{image}', [ProductAdminController::class, 'destroyImage'])
-        ->name('products.images.destroy');
+//     // Products — full CRUD
+//     Route::resource('products', ProductAdminController::class);
+//     Route::delete('products/variants/{variant}', [ProductAdminController::class, 'destroyVariant'])
+//         ->name('products.variants.destroy');
+//     Route::delete('products/images/{image}', [ProductAdminController::class, 'destroyImage'])
+//         ->name('products.images.destroy');
 
-    // Categories — tree management
-    Route::resource('categories', CategoryAdminController::class)
-        ->only(['index', 'store', 'update', 'destroy'])
-        ->parameters(['categories' => 'adminCategory']);
-    Route::patch('categories/{adminCategory}/toggle', [CategoryAdminController::class, 'toggle'])
-        ->name('categories.toggle');
+//     // Categories — tree management
+//     Route::resource('categories', CategoryAdminController::class)
+//         ->only(['index', 'store', 'update', 'destroy'])
+//         ->parameters(['categories' => 'adminCategory']);
+//     Route::patch('categories/{adminCategory}/toggle', [CategoryAdminController::class, 'toggle'])
+//         ->name('categories.toggle');
 
-    // Users
-    Route::resource('users', UserAdminController::class)
-        ->only(['index', 'show', 'update', 'destroy']);
+//     // Users
+//     Route::resource('users', UserAdminController::class)
+//         ->only(['index', 'show', 'update', 'destroy']);
 
-    Route::patch('users/{user}/role', [UserAdminController::class, 'updateRole'])
-        ->name('users.role');
+//     Route::patch('users/{user}/role', [UserAdminController::class, 'updateRole'])
+//         ->name('users.role');
 
-    // Shipping methods
-    Route::resource('shipping', ShippingAdminController::class)
-        ->only(['index', 'store', 'update', 'destroy']);
-});
+//     // Shipping methods
+//     Route::resource('shipping', ShippingAdminController::class)
+//         ->only(['index', 'store', 'update', 'destroy']);
+// });
 
 Route::group(['middleware' => 'guest'], function () {
     Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');

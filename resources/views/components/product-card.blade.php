@@ -12,7 +12,7 @@
         <div class="relative aspect-[3/4] overflow-hidden bg-gray-100">
             @php
                 // Just grab the first image object safely. Do NOT read ->image_path here!
-                $image = $product->primaryImage ? $product->primaryImage->first() : null;
+                $image = $product->primaryImage ? $product->globalImages->first() : null;
             @endphp
 
             {{-- Check if the image object actually exists before attempting to read its properties --}}

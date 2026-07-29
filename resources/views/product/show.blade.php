@@ -128,7 +128,6 @@
         }">
 
             {{-- ── Gallery Space (7/12 Columns on Wide Screens) ──────────────── --}}
-            {{-- ── Gallery Space (7/12 Columns on Wide Screens) ──────────────── --}}
             <div class="lg:col-span-7 w-full" x-data="{ lightboxOpen: false }">
 
                 <div class="flex flex-col-reverse md:flex-row gap-4 items-start">
@@ -286,7 +285,7 @@
                 {{-- Core Body Description --}}
                 <div class="mt-5 border-t border-gray-100 pt-5">
                     <p class="text-gray-600 font-light leading-relaxed text-sm">
-                        {{ $product->description }}
+                        {!! $product->description !!}
                     </p>
                 </div>
 

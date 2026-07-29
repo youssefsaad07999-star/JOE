@@ -29,7 +29,6 @@ return new class extends Migration
             $table->string('shipping_postal_code')->nullable();
             $table->string('shipping_country')->nullable();
             $table->string('shipping_phone')->nullable();
-            $table->string('shipping_method')->nullable();
             $table->decimal('shipping_cost', 10, 2)->default(0);
             $table->timestamps();
         });

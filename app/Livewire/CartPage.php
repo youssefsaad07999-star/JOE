@@ -2,8 +2,8 @@
 
 namespace App\Livewire;
 
-use App\Models\ProductModels\CartItem;
-use App\Models\ProductModels\ProductVariant;
+use App\Models\CartItem;
+use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\ShopSetting;
 use Livewire\Attributes\Computed;
@@ -24,7 +24,7 @@ class CartPage extends Component
     public function cartItems()
     {
         return $this->currentCartQuery()
-            ->with(['variant.product', 'variant.size', 'variant.color', 'variant.product.images', 'variant.images'])
+            ->with(['variant.product', 'variant.size', 'variant.color', 'variant.product.images'])
             ->get();
     }
 

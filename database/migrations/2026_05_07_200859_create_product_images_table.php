@@ -2,7 +2,6 @@
 
 use App\Models\ProductModels\Color;
 use App\Models\ProductModels\Product;
-use App\Models\ProductModels\ProductVariant;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -21,7 +20,6 @@ return new class extends Migration
                 ->nullable()
                 ->constrained()
                 ->nullOnDelete();
-            $table->foreignIdFor(ProductVariant::class)->nullable()->constrained()->cascadeOnDelete();
             $table->string('image_path');
             $table->integer('sort_order')->default(0);
             $table->boolean('is_primary')->default(false);

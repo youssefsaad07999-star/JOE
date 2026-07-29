@@ -34,14 +34,16 @@
                             <p class="text-xs text-gray-400 mb-0.5">Status</p>
                             <span
                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap
-                                {{ match ($order->status) {
-                                    'delivered' => 'bg-emerald-100 text-emerald-700',
-                                    'shipped' => 'bg-blue-100 text-blue-700',
-                                    'processing' => 'bg-amber-100 text-amber-700',
-                                    'cancelled' => 'bg-red-100 text-red-700',
-                                    default => 'bg-gray-100 text-gray-600',
-                                } }}">
-                                {{ ucfirst($order->status ?? 'pending') }}
+                                    {{ match ($order->status?->value ?? $order->status) {
+                                        'delivered' => 'bg-emerald-100 text-emerald-700',
+                                        'shipped' => 'bg-blue-100 text-blue-700',
+                                        'processing' => 'bg-amber-100 text-amber-700',
+                                        'pending' => 'bg-yellow-100 text-yellow-700',
+                                        'cancelled' => 'bg-red-100 text-red-700',
+                                        'refunded' => 'bg-rose-100 text-rose-700',
+                                        default => 'bg-gray-100 text-gray-600',
+                                    } }}">
+                                {{ $order->status?->getLabel() ?? ucfirst($order->status) }}
                             </span>
                         </div>
 
@@ -65,14 +67,15 @@
                                 <p class="text-xs text-gray-400 mb-0.5">Payment Status</p>
                                 <span
                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium whitespace-nowrap
-                                    {{ match ($order->payment->status) {
-                                        'completed' => 'bg-emerald-100 text-emerald-700',
+                                    {{ match ($order->payment->status->value) {
+                                        'paid' => 'bg-emerald-100 text-emerald-700',
                                         'processing' => 'bg-blue-100 text-blue-700',
                                         'pending' => 'bg-amber-100 text-amber-700',
-                                        'refunded' => 'bg-red-100 text-red-700',
+                                        'cancelled' => 'bg-red-100 text-red-700',
+                                        'refunded' => 'bg-gray-100 text-gray-600',
                                         default => 'bg-gray-100 text-gray-600',
                                     } }}">
-                                    {{ ucfirst($order->payment->status ?? 'Error') }}
+                                    {{ ucfirst($order->payment->status->getLabel() ?? 'Error') }}
                                 </span>
                             </div>
                         @endif
@@ -92,7 +95,7 @@
                 <div class="px-4 sm:px-6 py-4 flex flex-wrap gap-2.5 sm:gap-3 items-center">
                     @foreach ($order->variants as $variant)
                         <div
-                            class="w-12 h-14 sm:w-14 sm:h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
+                            class="w-12 h-14 sm:w-14 sm:h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-100">
                             @php
                                 $img = $variant->product->images->where('color_id', $variant->color_id)->first();
                             @endphp

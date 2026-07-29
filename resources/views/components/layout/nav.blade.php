@@ -114,12 +114,12 @@ text-[#C85C6E]
 
         {{-- RIGHT ICONS --}}
         <div class="flex items-center gap-2">
-            @admin
-                <a href="{{ route('admin.dashboard') }}"
-                    class="px-3 py-1.5 text-sm font-light text-gray-300 hover:text-white transition-colors">
+            @hasrole(['admin', 'super_admin'])
+                {{-- {{ route('admin.dashboard') }} --}}
+                <a href="/admin" class="px-3 py-1.5 text-sm font-light text-gray-300 hover:text-white transition-colors">
                     Admin
                 </a>
-            @endadmin
+            @endhasrole
             @auth
                 <div class="hidden md:flex items-center gap-2">
                     <a href="{{ route('orders.index') }}"

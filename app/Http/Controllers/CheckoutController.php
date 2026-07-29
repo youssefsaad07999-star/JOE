@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\InsufficientStockException;
+use App\Models\CartItem;
 use App\Models\Country;
 use App\Models\Order;
-use App\Models\ProductModels\CartItem;
-use App\Models\ProductModels\ProductVariant;
+use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use App\Models\ShopSetting;
 use App\Notifications\OrderCreatedNotification;
+use App\OrderStatus;
+use App\PaymentStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -116,7 +118,7 @@ class CheckoutController extends Controller
                     'address_id' => Auth::user()->addresses()->where('is_default', true)->value('id'),
                     'shipping_method_id' => $shippingMethod->id,
                     'total_price' => $total,
-                    'status' => $data['payment_method'] === 'cod' ? 'processing' : 'pending',
+                    'status' => $data['payment_method'] === 'cod' ? OrderStatus::Processing : OrderStatus::Pending,
                     'shipping_first_name' => $data['first_name'],
                     'shipping_last_name' => $data['last_name'],
                     'shipping_address' => $data['address'],
@@ -125,7 +127,6 @@ class CheckoutController extends Controller
                     'shipping_country' => $data['country'],
                     'shipping_postal_code' => $data['postal_code'],
                     'shipping_phone' => $data['phone'],
-                    'shipping_method' => $shippingMethod->name,
                     'shipping_cost' => $shippingCost,
                 ]);
 
@@ -136,14 +137,13 @@ class CheckoutController extends Controller
                         'subtotal' => $item->unit_price * $item->quantity,
                     ]);
 
-                    if ($data['payment_method'] === 'cod') {
-                        $variant = $validatedVariants[$item->id];
-                        $newStock = $variant->stock_quantity - $item->quantity;
+                    $variant = $validatedVariants[$item->id];
+                    $newStock = $variant->stock_quantity - $item->quantity;
 
-                        $variant->update([
-                            'stock_quantity' => max(0, $newStock),
-                        ]);
-                    }
+                    $variant->update([
+                        'stock_quantity' => max(0, $newStock),
+                    ]);
+
                 }
 
                 return $order;
@@ -161,7 +161,7 @@ class CheckoutController extends Controller
         if ($data['payment_method'] === 'cod') {
 
             $this->clearCart();
-            $order->update(['status' => 'processing']);
+            $order->update(['status' => OrderStatus::Processing]);
 
             $user = $order->user;
             $user->notify(new OrderCreatedNotification($order));
@@ -170,7 +170,7 @@ class CheckoutController extends Controller
                 'user_id' => $order->user_id,
                 'amount' => $total,
                 'method' => $data['payment_method'] === 'cod' ? 'cash on delivery' : 'card',
-                'status' => 'pending',
+                'status' => PaymentStatus::Pending,
                 'transaction_id' => null,
             ]);
 
@@ -203,12 +203,7 @@ class CheckoutController extends Controller
 
     public function success(Order $order)
     {
-
         abort_if($order->user_id !== Auth::id(), 403);
-
-        // we don't need to clear the cart here
-        // already cleared in the webhook listener after successful payment
-        $order->load(['variants.product', 'variants.size', 'variants.color']);
 
         return view('checkout.success', compact('order'));
     }

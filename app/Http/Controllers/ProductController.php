@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProductModels\Category;
-use App\Models\ProductModels\Product;
+use App\Models\Category;
+use App\Models\Product;
 
 class ProductController extends Controller
 {
@@ -20,7 +20,7 @@ class ProductController extends Controller
         $categories = $gender->children()->with('children')->get();
 
         // All products sitting under this gender
-        $products = Product::with(['variants', 'images', 'primaryImage'])
+        $products = Product::with(['variants', 'images', 'primaryImage', 'globalImages'])
             ->isActive()
             ->whereHas('category.parent.parent', fn ($q) => $q->where('id', $gender->id))
             ->with('category.parent.parent')

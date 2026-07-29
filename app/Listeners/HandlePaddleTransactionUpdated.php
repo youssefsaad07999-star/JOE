@@ -4,6 +4,8 @@ namespace App\Listeners;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\OrderStatus;
+use App\PaymentStatus;
 use Laravel\Paddle\Events\TransactionUpdated;
 
 class HandlePaddleTransactionUpdated
@@ -30,9 +32,12 @@ class HandlePaddleTransactionUpdated
             return;
         }
 
-        $order->update(['status' => 'cancelled']);
+        $order->update([
+            'status' => OrderStatus::Cancelled,
+            'refund_reason' => 'Payment attempt failed or timed out. Please try placing your order again.',
+        ]);
 
         Payment::where('order_id', $order->id)
-            ->update(['status' => 'failed']);
+            ->update(['status' => PaymentStatus::Failed]);
     }
 }

@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\CartItem;
+use App\Models\Category;
 use App\Models\Order;
-use App\Models\ProductModels\CartItem;
-use App\Models\ProductModels\Category;
-use App\Models\ProductModels\Product;
+use App\Models\Product;
 use App\Models\User;
+use App\Observers\OrderObserver;
+use Filament\Actions\CreateAction;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
@@ -34,20 +36,24 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('active', function ($routeName) {
             return Route::is($routeName);
         });
-
-        Blade::if('admin', function () {
-            return auth()->check()
-            && auth()->user()->role === 'admin';
-        });
+        Order::observe(OrderObserver::class);
+        // Blade::if('admin', function () {
+        //     return auth()->check()
+        //     && auth()->user()->role === 'admin';
+        // });
 
         $this->registerRouteBindings();
         $this->registerViewComposers();
+
+        CreateAction::configureUsing(function ($action) {
+            return $action->slideOver();
+        });
 
     }
 
     private function registerRouteBindings(): void
     {
-        /*
+        /*'
          * {gender} → Category where depth = 'gender', matched by slug
          */
         Route::bind('gender', function (string $slug) {
@@ -92,7 +98,7 @@ class AppServiceProvider extends ServiceProvider
          * {subcategory} → Category where depth = 'subcategory',
          * scoped to the already-resolved {category}
          */
-        Route::bind('subcategory', function (string $slug) {
+        Route::bind('subcategory', function ($slug) {
 
             if (request()->hasHeader('X-Livewire')) {
                 $browserUrl = request()->header('referer');
@@ -126,13 +132,13 @@ class AppServiceProvider extends ServiceProvider
             return Category::findOrFail($id);
         });
 
-        Route::bind('product', function (string $slug) {
+        Route::bind('product', function ($slug) {
             return Product::with(['variants.size', 'variants.color', 'images', 'primaryImage', 'fit', 'brand'])
                 ->where('slug', $slug)
                 ->first();
         });
 
-        Route::bind('order', function (int $id) {
+        Route::bind('order', function ($id) {
             return Order::with([
                 'variants.product.fit',
                 'variants.product.images',
@@ -145,7 +151,7 @@ class AppServiceProvider extends ServiceProvider
 
         });
         // orders addresses
-        Route::bind('user', function (string $id) {
+        Route::bind('user', function ($id) {
             return User::with(['addresses'])->findOrFail($id);
         });
     }

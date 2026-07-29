@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\ProductModels\Brand;
-use App\Models\ProductModels\Category;
-use App\Models\ProductModels\Color;
-use App\Models\ProductModels\Fit;
-use App\Models\ProductModels\Product;
-use App\Models\ProductModels\ProductImage;
-use App\Models\ProductModels\ProductVariant;
-use App\Models\ProductModels\Size;
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Color;
+use App\Models\Fit;
+use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\ProductVariant;
+use App\Models\Size;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;

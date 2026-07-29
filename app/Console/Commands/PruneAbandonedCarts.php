@@ -34,6 +34,6 @@ class PruneAbandonedCarts extends Command
 
         $this->info("Process completed successfully. Swept and purged {$deletedCount} abandoned line items from storage.");
 
-        return Command::SUCCESS;
+        return self::SUCCESS;
     }
 }
