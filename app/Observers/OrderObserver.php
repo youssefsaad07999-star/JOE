@@ -22,14 +22,11 @@ class OrderObserver
     public function updated(Order $order): void
     {
         if ($order->wasChanged('status') && $order->status === OrderStatus::Refunded) {
-            // Observer remains silent because the Filament Refund Action handled restocking safely
             return;
         } elseif ($order->wasChanged('status') && $order->status === OrderStatus::Delivered) {
 
-            // 2. Check if the payment method was Cash on Delivery
             if ($order->payment->method === 'cash on delivery') {
 
-                // 3. Automatically update or create the payment record
                 $order->payment->updateOrCreate(
                     ['order_id' => $order->id],
                     [
